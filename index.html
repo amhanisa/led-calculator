@@ -173,10 +173,12 @@
                     leftoverY = (ledHeight - contentHeight) / 2;
                 }
 
-                const pixelWidth = Math.floor((ledWidth * 1000) / pitch);
-                const pixelHeight = Math.floor((ledHeight * 1000) / pitch);
-                const contentPixelWidth = Math.floor((contentWidth * 1000) / pitch);
-                const contentPixelHeight = Math.floor((contentHeight * 1000) / pitch);
+                const pitchPixel = Math.floor(1000 / pitch);
+
+                const pixelWidth = ledWidth * pitchPixel;
+                const pixelHeight = ledHeight * pitchPixel;
+                const contentPixelWidth = Math.floor(contentWidth * pitchPixel);
+                const contentPixelHeight = Math.floor(contentHeight * pitchPixel);
 
                 const padding = 40;
                 const scaleX = (canvas.width - 2 * padding) / ledWidth;

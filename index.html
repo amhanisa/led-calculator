@@ -28,7 +28,6 @@
                 max-width: 100%;
                 max-height: 100%;
                 display: block;
-                background: #fff;
                 margin: 0 auto;
             }
 
@@ -88,6 +87,31 @@
         </main>
 
         <script>
+            function getThemeColors() {
+                const theme = document.documentElement.getAttribute("data-theme");
+                if (theme === "dark") {
+                    return {
+                        background: "#13171f",
+                        box: "#13171f",
+                        content: "#29a8e0",
+                        textBg: "#29a8e0",
+                        textColor: "#ffffff",
+                        stroke: "#ffffff",
+                        leftover: "red",
+                    };
+                } else {
+                    return {
+                        background: "#ffffff",
+                        box: "#ffffff",
+                        content: "#29a8e0",
+                        textBg: "#29a8e0",
+                        textColor: "#ffffff",
+                        stroke: "#000000",
+                        leftover: "red",
+                    };
+                }
+            }
+
             function calculate() {
                 const ledWidth = parseFloat(document.getElementById("inputW").value);
                 const ledHeight = parseFloat(document.getElementById("inputH").value);
@@ -98,18 +122,16 @@
                     return;
                 }
 
+                const colors = getThemeColors();
+
                 const canvas = document.getElementById("ledCanvas");
                 const ctx = canvas.getContext("2d");
-
                 const container = document.querySelector(".canvas-container");
+
                 const ledRatio = ledWidth / ledHeight;
-                const containerWidth = Math.min(container.offsetWidth, 800);
                 const maxWidth = 800;
                 const maxHeight = 600;
-
-                // Tentukan ukuran internal canvas maksimal (drawing area)
                 const canvasRatio = maxWidth / maxHeight;
-
                 let drawWidth, drawHeight;
 
                 if (ledRatio >= canvasRatio) {
@@ -120,15 +142,12 @@
                     drawWidth = drawHeight * ledRatio + 100;
                 }
 
-                // Set ukuran internal canvas
                 canvas.width = drawWidth;
                 canvas.height = drawHeight;
 
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-                // Isi canvas dengan warna latar belakang putih
-                ctx.fillStyle = "#ffffff";
-                ctx.fillRect(0, 0, canvas.width, canvas.height); // Isi seluruh canvas dengan warna putih
+                ctx.fillStyle = colors.background;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
 
                 let contentWidth = (16 / 9) * ledHeight;
                 let contentHeight = ledHeight;
@@ -158,16 +177,16 @@
                 const offsetX = padding + leftoverX * scale;
                 const offsetY = padding + leftoverY * scale;
 
-                ctx.fillStyle = "#ffffff";
+                ctx.fillStyle = colors.box;
                 ctx.fillRect(padding, padding, boxW, boxH);
-                ctx.strokeStyle = "#000";
+                ctx.strokeStyle = colors.stroke;
                 ctx.lineWidth = 4;
                 ctx.strokeRect(padding - 2, padding - 2, boxW + 4, boxH + 4);
 
-                ctx.fillStyle = "#29a8e0";
+                ctx.fillStyle = colors.content;
                 ctx.fillRect(offsetX, offsetY, contentW, contentH);
 
-                ctx.strokeStyle = "white";
+                ctx.strokeStyle = colors.textColor;
                 ctx.setLineDash([5, 5]);
                 ctx.lineWidth = 1;
                 ctx.beginPath();
@@ -190,15 +209,15 @@
                 const backgroundWidth = textWidth + 20;
                 const backgroundHeight = totalTextHeight + 10;
 
-                ctx.fillStyle = "#29a8e0";
+                ctx.fillStyle = colors.textBg;
                 ctx.fillRect(textX - backgroundWidth / 2, textY - textHeight / 2 - 5, backgroundWidth, backgroundHeight);
 
-                ctx.fillStyle = "#fff";
+                ctx.fillStyle = colors.textColor;
                 for (let i = 0; i < textLines.length; i++) {
                     ctx.fillText(textLines[i], textX, textY + i * textHeight + 3);
                 }
 
-                ctx.fillStyle = "#000";
+                ctx.fillStyle = colors.stroke;
                 ctx.font = "12px sans-serif";
 
                 if (leftoverX > 0) {
@@ -209,7 +228,7 @@
                     ctx.beginPath();
                     ctx.moveTo(arrowStartX, arrowY);
                     ctx.lineTo(arrowEndX, arrowY);
-                    ctx.strokeStyle = "red";
+                    ctx.strokeStyle = colors.leftover;
                     ctx.lineWidth = 1;
                     ctx.stroke();
 
@@ -231,7 +250,7 @@
                     ctx.beginPath();
                     ctx.moveTo(arrowX, arrowStartY);
                     ctx.lineTo(arrowX, arrowEndY);
-                    ctx.strokeStyle = "red";
+                    ctx.strokeStyle = colors.leftover;
                     ctx.lineWidth = 1;
                     ctx.stroke();
 
@@ -261,10 +280,8 @@
 
                 document.getElementById("info").innerHTML = `
                 <strong>Pitch Resolution:</strong> ${pitch} mm<br/>
-                <strong>LED Size:</strong> ${ledWidth.toFixed(2)} m x ${ledHeight.toFixed(2)} m
-                (${pixelWidth} px x ${pixelHeight} px)<br/>
-                <strong>16:9 Content Size:</strong> ${contentWidth.toFixed(2)} m x ${contentHeight.toFixed(2)} m
-                (${contentPixelWidth} px x ${contentPixelHeight} px)<br/>
+                <strong>LED Size:</strong> ${ledWidth.toFixed(2)} m x ${ledHeight.toFixed(2)} m (${pixelWidth} px x ${pixelHeight} px)<br/>
+                <strong>16:9 Content Size:</strong> ${contentWidth.toFixed(2)} m x ${contentHeight.toFixed(2)} m (${contentPixelWidth} px x ${contentPixelHeight} px)<br/>
                 <strong>Leftover:</strong> ${leftover.toFixed(2)} m
                 `;
             }
@@ -278,13 +295,14 @@
             const buttonTheme = document.querySelector(".theme-toggle");
             const html = document.documentElement;
 
-            // Fungsi untuk menyetel tema
             function setTheme(theme) {
                 html.setAttribute("data-theme", theme);
                 localStorage.setItem("theme", theme);
+                if (document.getElementById("inputW").value && document.getElementById("inputH").value) {
+                    calculate(); // redraw canvas after theme change
+                }
             }
 
-            // Fungsi untuk toggle tema
             function toggleTheme() {
                 const currentTheme = html.getAttribute("data-theme");
                 const newTheme = currentTheme === "light" ? "dark" : "light";
@@ -292,19 +310,16 @@
                 buttonTheme.classList.toggle("theme-toggle--toggled", newTheme === "dark");
             }
 
-            // Event listener
             buttonTheme.addEventListener("click", toggleTheme);
 
-            // Cek preferensi pengguna saat halaman dimuat
+            // Load theme from localStorage
             const savedTheme = localStorage.getItem("theme");
             if (savedTheme) {
                 setTheme(savedTheme);
-                buttonTheme.classList.toggle("theme-toggle--toggled", savedTheme === "dark");
             } else {
-                // Optional: mengikuti preferensi sistem jika belum ada simpanan
+                // Optionally detect system preference
                 const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
                 setTheme(prefersDark ? "dark" : "light");
-                buttonTheme.classList.toggle("theme-toggle--toggled", prefersDark);
             }
         </script>
     </body>

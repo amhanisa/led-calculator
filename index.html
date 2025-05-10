@@ -17,7 +17,7 @@
 
             .canvas-container {
                 width: 100%;
-                max-width: 800px;
+                max-width: 1000px;
                 max-height: 600px;
                 overflow: auto;
                 margin-top: 20px;
@@ -33,6 +33,15 @@
 
             .info {
                 margin-top: 20px;
+            }
+
+            .footer {
+                position: relative;
+                bottom: 0;
+                text-align: center;
+                font-size: 14px;
+                height: 2.5rem;
+                margin-top: 50px;
             }
         </style>
     </head>
@@ -59,6 +68,7 @@
                     </g>
                 </svg>
             </div>
+
             <h2>LED Calculator</h2>
 
             <div>
@@ -84,6 +94,8 @@
             </div>
 
             <div id="info" class="info"></div>
+
+            <div class="footer">LED Calculator V1.0</div>
         </main>
 
         <script>
@@ -129,17 +141,17 @@
                 const container = document.querySelector(".canvas-container");
 
                 const ledRatio = ledWidth / ledHeight;
-                const maxWidth = 800;
+                const maxWidth = 1000;
                 const maxHeight = 600;
                 const canvasRatio = maxWidth / maxHeight;
                 let drawWidth, drawHeight;
 
                 if (ledRatio >= canvasRatio) {
                     drawWidth = maxWidth;
-                    drawHeight = drawWidth / ledRatio + 100;
+                    drawHeight = drawWidth / ledRatio + 150;
                 } else {
                     drawHeight = maxHeight;
-                    drawWidth = drawHeight * ledRatio + 100;
+                    drawWidth = drawHeight * ledRatio + 150;
                 }
 
                 canvas.width = drawWidth;
@@ -161,10 +173,10 @@
                     leftoverY = (ledHeight - contentHeight) / 2;
                 }
 
-                const pixelWidth = Math.round((ledWidth * 1000) / pitch);
-                const pixelHeight = Math.round((ledHeight * 1000) / pitch);
-                const contentPixelWidth = Math.round((contentWidth * 1000) / pitch);
-                const contentPixelHeight = Math.round((contentHeight * 1000) / pitch);
+                const pixelWidth = Math.floor((ledWidth * 1000) / pitch);
+                const pixelHeight = Math.floor((ledHeight * 1000) / pitch);
+                const contentPixelWidth = Math.floor((contentWidth * 1000) / pitch);
+                const contentPixelHeight = Math.floor((contentHeight * 1000) / pitch);
 
                 const padding = 40;
                 const scaleX = (canvas.width - 2 * padding) / ledWidth;
@@ -279,10 +291,27 @@
                 ctx.restore();
 
                 document.getElementById("info").innerHTML = `
-                <strong>Pitch Resolution:</strong> ${pitch} mm<br/>
-                <strong>LED Size:</strong> ${ledWidth.toFixed(2)} m x ${ledHeight.toFixed(2)} m (${pixelWidth} px x ${pixelHeight} px)<br/>
-                <strong>16:9 Content Size:</strong> ${contentWidth.toFixed(2)} m x ${contentHeight.toFixed(2)} m (${contentPixelWidth} px x ${contentPixelHeight} px)<br/>
-                <strong>Leftover:</strong> ${leftover.toFixed(2)} m
+                <div class='grid'>
+                    <div>
+                        <strong>Pitch Resolution:</strong><br/>
+                        ${pitch} mm <br/>
+                        ${Math.floor(1000 / pitch)} px
+                    </div>
+                    <div>
+                        <strong>LED Size:</strong><br/>
+                        ${ledWidth.toFixed(2)} m x ${ledHeight.toFixed(2)} m <br/>
+                        (${pixelWidth} px x ${pixelHeight} px)
+                    </div>
+                    <div>
+                        <strong>16:9 Content Size:</strong><br/>
+                        ${contentWidth.toFixed(2)} m x ${contentHeight.toFixed(2)} m <br/>
+                        (${contentPixelWidth} px x ${contentPixelHeight} px)
+                    </div>
+                    <div>
+                        <strong>Leftover:</strong><br/>
+                        ${leftover.toFixed(2)} m
+                    </div>
+                </div>
                 `;
             }
 

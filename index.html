@@ -173,7 +173,7 @@
                     leftoverY = (ledHeight - contentHeight) / 2;
                 }
 
-                const pitchPixel = Math.floor(1000 / pitch);
+                const pitchPixel = Math.round(1000 / pitch);
 
                 const pixelWidth = ledWidth * pitchPixel;
                 const pixelHeight = ledHeight * pitchPixel;
@@ -297,7 +297,7 @@
                     <div>
                         <strong>Pitch Resolution:</strong><br/>
                         ${pitch} mm <br/>
-                        ${Math.floor(1000 / pitch)} px
+                        ${pitchPixel} px
                     </div>
                     <div>
                         <strong>LED Size:</strong><br/>

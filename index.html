@@ -81,14 +81,16 @@
                 const maxHeight = 600;
 
                 // Tentukan ukuran internal canvas maksimal (drawing area)
+                const canvasRatio = maxWidth / maxHeight;
+
                 let drawWidth, drawHeight;
 
-                if (ledRatio >= maxWidth / maxHeight) {
-                    drawWidth = Math.min(containerWidth, maxWidth);
-                    drawHeight = drawWidth / ledRatio;
+                if (ledRatio >= canvasRatio) {
+                    drawWidth = maxWidth;
+                    drawHeight = drawWidth / ledRatio + 100;
                 } else {
-                    drawHeight = Math.min(maxHeight, containerWidth / ledRatio);
-                    drawWidth = drawHeight * ledRatio;
+                    drawHeight = maxHeight;
+                    drawWidth = drawHeight * ledRatio + 100;
                 }
 
                 // Set ukuran internal canvas

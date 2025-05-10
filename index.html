@@ -36,10 +36,10 @@
         <h2>LED Calculator</h2>
 
         <div class="input-section">
-            <label>Lebar LED (W) dalam meter: <input type="number" id="inputW" step="0.01" /></label><br /><br />
-            <label>Tinggi LED (H) dalam meter: <input type="number" id="inputH" step="0.01" /></label><br /><br />
+            <label>LED Width (W) in meter: <input type="number" id="inputW" step="0.01" /></label><br /><br />
+            <label>LED Height (H) in meter: <input type="number" id="inputH" step="0.01" /></label><br /><br />
             <label for="pitch">
-                Pitch LED
+                LED Pitch
                 <select id="pitch">
                     <option value="2.604">P2.6 (2.604 mm)</option>
                     <option value="2.976">P2.9 (2.976 mm)</option>
@@ -47,7 +47,7 @@
                 </select>
             </label>
             <br /><br />
-            <button onclick="hitungDanGambar()">Hitung dan Tampilkan</button>
+            <button onclick="calculate()">Calculate</button>
         </div>
 
         <div class="canvas-container">
@@ -57,13 +57,13 @@
         <div id="info" class="info"></div>
 
         <script>
-            function hitungDanGambar() {
-                const W = parseFloat(document.getElementById("inputW").value);
-                const H = parseFloat(document.getElementById("inputH").value);
+            function calculate() {
+                const ledWidth = parseFloat(document.getElementById("inputW").value);
+                const ledHeight = parseFloat(document.getElementById("inputH").value);
                 const pitch = parseFloat(document.getElementById("pitch").value);
 
-                if (!W || !H || W <= 0 || H <= 0) {
-                    alert("Masukkan nilai W dan H yang valid.");
+                if (!ledWidth || !ledHeight || ledWidth <= 0 || ledHeight <= 0) {
+                    alert("Please enter valid values for Width and Height.");
                     return;
                 }
 
@@ -71,15 +71,15 @@
                 const ctx = canvas.getContext("2d");
 
                 const maxCanvasSize = 800;
-                const isHorizontal = W >= H;
+                const isHorizontal = ledWidth >= ledHeight;
 
                 let canvasWidth, canvasHeight;
                 if (isHorizontal) {
                     canvasWidth = maxCanvasSize;
-                    canvasHeight = (H / W) * canvasWidth;
+                    canvasHeight = (ledHeight / ledWidth) * canvasWidth;
                 } else {
-                    canvasHeight = 600;
-                    canvasWidth = (W / H) * canvasHeight;
+                    canvasWidth = 300;
+                    canvasHeight = (ledHeight / ledWidth) * canvasWidth;
                 }
 
                 canvas.width = canvasWidth;
@@ -87,33 +87,33 @@
 
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                let kontenWidth = (16 / 9) * H;
-                let kontenHeight = H;
-                let sisaX = (W - kontenWidth) / 2;
-                let sisaY = 0;
+                let contentWidth = (16 / 9) * ledHeight;
+                let contentHeight = ledHeight;
+                let leftoverX = (ledWidth - contentWidth) / 2;
+                let leftoverY = 0;
 
-                if (kontenWidth > W) {
-                    kontenWidth = W;
-                    kontenHeight = (9 / 16) * W;
-                    sisaX = 0;
-                    sisaY = (H - kontenHeight) / 2;
+                if (contentWidth > ledWidth) {
+                    contentWidth = ledWidth;
+                    contentHeight = (9 / 16) * ledWidth;
+                    leftoverX = 0;
+                    leftoverY = (ledHeight - contentHeight) / 2;
                 }
 
-                const pixelW = Math.round((W * 1000) / pitch);
-                const pixelH = Math.round((H * 1000) / pitch);
-                const pixelKontenW = Math.round((kontenWidth * 1000) / pitch);
-                const pixelKontenH = Math.round((kontenHeight * 1000) / pitch);
+                const pixelWidth = Math.round((ledWidth * 1000) / pitch);
+                const pixelHeight = Math.round((ledHeight * 1000) / pitch);
+                const contentPixelWidth = Math.round((contentWidth * 1000) / pitch);
+                const contentPixelHeight = Math.round((contentHeight * 1000) / pitch);
 
                 const padding = 40;
-                const scaleX = (canvas.width - 2 * padding) / W;
-                const scaleY = (canvas.height - 2 * padding) / H;
+                const scaleX = (canvas.width - 2 * padding) / ledWidth;
+                const scaleY = (canvas.height - 2 * padding) / ledHeight;
                 const scale = Math.min(scaleX, scaleY);
-                const boxW = W * scale;
-                const boxH = H * scale;
-                const innerW = kontenWidth * scale;
-                const innerH = kontenHeight * scale;
-                const offsetX = padding + sisaX * scale;
-                const offsetY = padding + sisaY * scale;
+                const boxW = ledWidth * scale;
+                const boxH = ledHeight * scale;
+                const contentW = contentWidth * scale;
+                const contentH = contentHeight * scale;
+                const offsetX = padding + leftoverX * scale;
+                const offsetY = padding + leftoverY * scale;
 
                 ctx.fillStyle = "#ffffff";
                 ctx.fillRect(padding, padding, boxW, boxH);
@@ -122,40 +122,34 @@
                 ctx.strokeRect(padding - 2, padding - 2, boxW + 4, boxH + 4);
 
                 ctx.fillStyle = "#29a8e0";
-                ctx.fillRect(offsetX, offsetY, innerW, innerH);
+                ctx.fillRect(offsetX, offsetY, contentW, contentH);
 
                 ctx.strokeStyle = "white";
                 ctx.setLineDash([5, 5]);
                 ctx.lineWidth = 1;
                 ctx.beginPath();
                 ctx.moveTo(offsetX, offsetY);
-                ctx.lineTo(offsetX + innerW, offsetY + innerH);
-                ctx.moveTo(offsetX + innerW, offsetY);
-                ctx.lineTo(offsetX, offsetY + innerH);
+                ctx.lineTo(offsetX + contentW, offsetY + contentH);
+                ctx.moveTo(offsetX + contentW, offsetY);
+                ctx.lineTo(offsetX, offsetY + contentH);
                 ctx.stroke();
                 ctx.setLineDash([]);
 
-                const textLines = ["Konten 16:9", `${kontenWidth.toFixed(2)} m x ${kontenHeight.toFixed(2)} m`, `${pixelKontenW} px x ${pixelKontenH} px`];
+                const textLines = ["16:9 Content", `${contentWidth.toFixed(2)} m x ${contentHeight.toFixed(2)} m`, `${contentPixelWidth} px x ${contentPixelHeight} px`];
 
                 ctx.font = "12px sans-serif";
-                ctx.textAlign = "center"; // Pastikan teks di tengah secara horizontal
-                const textHeight = 14; // Tinggi per baris teks
-                const totalTextHeight = textLines.length * textHeight; // Total tinggi teks
+                ctx.textAlign = "center";
+                const textHeight = 14;
+                const totalTextHeight = textLines.length * textHeight;
+                const textX = offsetX + contentW / 2;
+                const textY = offsetY + contentH / 2 - totalTextHeight / 2 + textHeight / 2;
+                const textWidth = Math.max(...textLines.map((line) => ctx.measureText(line).width));
+                const backgroundWidth = textWidth + 20;
+                const backgroundHeight = totalTextHeight + 10;
 
-                // Menghitung posisi X dan Y untuk memastikan teks berada di tengah
-                const textX = offsetX + innerW / 2; // Posisi X di tengah konten biru
-                const textY = offsetY + innerH / 2 - totalTextHeight / 2 + textHeight / 2; // Posisi Y di tengah vertikal konten biru
-
-                // Mengatur lebar background biru berdasarkan ukuran teks
-                const textWidth = Math.max(...textLines.map((line) => ctx.measureText(line).width)); // Mengambil lebar teks terpanjang
-                const backgroundWidth = textWidth + 20; // Menambahkan sedikit padding
-                const backgroundHeight = totalTextHeight + 10; // Menambahkan sedikit padding
-
-                // Gambar background biru untuk teks
                 ctx.fillStyle = "#29a8e0";
                 ctx.fillRect(textX - backgroundWidth / 2, textY - textHeight / 2 - 5, backgroundWidth, backgroundHeight);
 
-                // Gambar teks di atas background biru
                 ctx.fillStyle = "#fff";
                 for (let i = 0; i < textLines.length; i++) {
                     ctx.fillText(textLines[i], textX, textY + i * textHeight + 3);
@@ -164,9 +158,9 @@
                 ctx.fillStyle = "#000";
                 ctx.font = "12px sans-serif";
 
-                if (sisaX > 0) {
+                if (leftoverX > 0) {
                     const arrowY = padding - 10;
-                    const arrowStartX = offsetX - sisaX * scale;
+                    const arrowStartX = offsetX - leftoverX * scale;
                     const arrowEndX = offsetX;
 
                     ctx.beginPath();
@@ -183,12 +177,12 @@
                     ctx.lineTo(arrowEndX, arrowY + 3);
                     ctx.stroke();
 
-                    ctx.fillText(`Sisa ${sisaX.toFixed(2)} m`, (arrowStartX + arrowEndX) / 2, arrowY - 5);
+                    ctx.fillText(`Leftover ${leftoverX.toFixed(2)} m`, (arrowStartX + arrowEndX) / 2, arrowY - 5);
                 }
 
-                if (sisaY > 0) {
+                if (leftoverY > 0) {
                     const arrowX = padding - 10;
-                    const arrowStartY = offsetY - sisaY * scale;
+                    const arrowStartY = offsetY - leftoverY * scale;
                     const arrowEndY = offsetY;
 
                     ctx.beginPath();
@@ -206,32 +200,33 @@
                     ctx.stroke();
 
                     ctx.save();
-                    ctx.translate(padding - 15, (arrowStartY + arrowEndY) / 2); // pindahkan ke kiri kotak
+                    ctx.translate(padding - 15, (arrowStartY + arrowEndY) / 2);
                     ctx.rotate(-Math.PI / 2);
-                    ctx.fillText(`Sisa ${sisaY.toFixed(2)} m`, 0, 0);
+                    ctx.fillText(`Leftover ${leftoverY.toFixed(2)} m`, 0, 0);
                     ctx.restore();
                 }
+
                 ctx.font = "16px sans-serif";
-                ctx.fillText(`W: ${W.toFixed(2)} m / ${pixelW} px`, padding + boxW / 2, padding + boxH + 25);
+                ctx.fillText(`W: ${ledWidth.toFixed(2)} m / ${pixelWidth} px`, padding + boxW / 2, padding + boxH + 25);
                 ctx.save();
                 ctx.translate(padding + boxW + 25, padding + boxH / 2);
                 ctx.rotate(-Math.PI / 2);
-                ctx.fillText(`H: ${H.toFixed(2)} m / ${pixelH} px`, 0, 0);
+                ctx.fillText(`H: ${ledHeight.toFixed(2)} m / ${pixelHeight} px`, 0, 0);
                 ctx.restore();
 
                 document.getElementById("info").innerHTML = `
-                <strong>Resolusi Pitch:</strong> ${pitch} mm<br/>
-                <strong>Ukuran LED:</strong> ${W.toFixed(2)} m x ${H.toFixed(2)} m
-                (${pixelW} px x ${pixelH} px)<br/>
-                <strong>Ukuran Konten 16:9:</strong> ${kontenWidth.toFixed(2)} m x ${kontenHeight.toFixed(2)} m
-                (${pixelKontenW} px x ${pixelKontenH} px)
-            `;
+                <strong>Pitch Resolution:</strong> ${pitch} mm<br/>
+                <strong>LED Size:</strong> ${ledWidth.toFixed(2)} m x ${ledHeight.toFixed(2)} m
+                (${pixelWidth} px x ${pixelHeight} px)<br/>
+                <strong>16:9 Content Size:</strong> ${contentWidth.toFixed(2)} m x ${contentHeight.toFixed(2)} m
+                (${contentPixelWidth} px x ${contentPixelHeight} px)
+                `;
             }
 
             window.addEventListener("resize", () => {
                 const W = parseFloat(document.getElementById("inputW").value);
                 const H = parseFloat(document.getElementById("inputH").value);
-                if (W && H) hitungDanGambar();
+                if (W && H) calculate();
             });
         </script>
     </body>

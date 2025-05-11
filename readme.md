@@ -1,5 +1,5 @@
 # LED Resolution Calculator
 
-Alat berbasis web dengan tampilan modern untuk menghitung resolusi layar LED berdasarkan ukuran fisik (meter) dan pixel pitch (mm) — lengkap dengan pratinjau tampilan konten 16:9 secara real-time.
+A simple tool for calculating LED screen resolution based on physical dimensions (in meters) and pixel pitch (in millimeters) — with a preview of 16:9 content display.
 
-![Example](screenshot.png)
+![Screenshot](screenshot.png)

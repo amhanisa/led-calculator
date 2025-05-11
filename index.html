@@ -156,6 +156,7 @@
                 }
             }
 
+            // Fungsi calculate() lengkap dengan padding aman untuk memastikan semua elemen terlihat
             function calculate() {
                 const ledWidth = parseFloat(document.getElementById("inputW").value);
                 const ledHeight = parseFloat(document.getElementById("inputH").value);
@@ -167,31 +168,31 @@
                 }
 
                 const colors = getThemeColors();
-
                 const canvas = document.getElementById("ledCanvas");
                 const ctx = canvas.getContext("2d");
-                const container = document.querySelector(".canvas-container");
 
-                const ledRatio = ledWidth / ledHeight;
-                const maxWidth = 1000;
-                const maxHeight = 600;
-                const canvasRatio = maxWidth / maxHeight;
-                let drawWidth, drawHeight;
+                const maxCanvasWidth = 1000;
+                const maxCanvasHeight = 600;
+                const padding = { top: 60, bottom: 60, left: 60, right: 60 };
 
-                if (ledRatio >= canvasRatio) {
-                    drawWidth = maxWidth;
-                    drawHeight = drawWidth / ledRatio + 100;
-                } else {
-                    drawHeight = maxHeight;
-                    drawWidth = drawHeight * ledRatio + 100;
-                }
+                const availableWidth = maxCanvasWidth - padding.left - padding.right;
+                const availableHeight = maxCanvasHeight - padding.top - padding.bottom;
+                const scale = Math.min(availableWidth / ledWidth, availableHeight / ledHeight);
 
-                canvas.width = drawWidth;
-                canvas.height = drawHeight;
+                const boxW = ledWidth * scale;
+                const boxH = ledHeight * scale;
+                const canvasWidth = boxW + padding.left + padding.right;
+                const canvasHeight = boxH + padding.top + padding.bottom;
+
+                canvas.width = canvasWidth;
+                canvas.height = canvasHeight;
 
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.fillStyle = colors.background;
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                const paddingX = padding.left;
+                const paddingY = padding.top;
 
                 let contentWidth = (16 / 9) * ledHeight;
                 let contentHeight = ledHeight;
@@ -206,32 +207,28 @@
                 }
 
                 const pitchPixel = Math.round(1000 / pitch);
+                const pixelWidth = Math.round(ledWidth * pitchPixel);
+                const pixelHeight = Math.round(ledHeight * pitchPixel);
+                const contentPixelWidth = Math.round(contentWidth * pitchPixel);
+                const contentPixelHeight = Math.round(contentHeight * pitchPixel);
 
-                const pixelWidth = ledWidth * pitchPixel;
-                const pixelHeight = ledHeight * pitchPixel;
-                const contentPixelWidth = Math.floor(contentWidth * pitchPixel);
-                const contentPixelHeight = Math.floor(contentHeight * pitchPixel);
-
-                const padding = 40;
-                const scaleX = (canvas.width - 2 * padding) / ledWidth;
-                const scaleY = (canvas.height - 2 * padding) / ledHeight;
-                const scale = Math.min(scaleX, scaleY);
-                const boxW = ledWidth * scale;
-                const boxH = ledHeight * scale;
                 const contentW = contentWidth * scale;
                 const contentH = contentHeight * scale;
-                const offsetX = padding + leftoverX * scale;
-                const offsetY = padding + leftoverY * scale;
+                const offsetX = paddingX + leftoverX * scale;
+                const offsetY = paddingY + leftoverY * scale;
 
+                // LED box
                 ctx.fillStyle = colors.box;
-                ctx.fillRect(padding, padding, boxW, boxH);
+                ctx.fillRect(paddingX, paddingY, boxW, boxH);
                 ctx.strokeStyle = colors.stroke;
                 ctx.lineWidth = 4;
-                ctx.strokeRect(padding - 2, padding - 2, boxW + 4, boxH + 4);
+                ctx.strokeRect(paddingX - 2, paddingY - 2, boxW + 4, boxH + 4);
 
+                // 16:9 content area
                 ctx.fillStyle = colors.content;
                 ctx.fillRect(offsetX, offsetY, contentW, contentH);
 
+                // Diagonal lines in content
                 ctx.strokeStyle = colors.textColor;
                 ctx.setLineDash([5, 5]);
                 ctx.lineWidth = 1;
@@ -243,8 +240,8 @@
                 ctx.stroke();
                 ctx.setLineDash([]);
 
+                // Center label
                 const textLines = ["16:9 Content", `${contentWidth.toFixed(2)} m x ${contentHeight.toFixed(2)} m`, `${contentPixelWidth} px x ${contentPixelHeight} px`];
-
                 ctx.font = "12px sans-serif";
                 ctx.textAlign = "center";
                 const textHeight = 14;
@@ -263,11 +260,12 @@
                     ctx.fillText(textLines[i], textX, textY + i * textHeight + 3);
                 }
 
+                // Leftover arrows
                 ctx.fillStyle = colors.stroke;
                 ctx.font = "12px sans-serif";
 
                 if (leftoverX > 0) {
-                    const arrowY = padding - 10;
+                    const arrowY = paddingY - 10;
                     const arrowStartX = offsetX - leftoverX * scale;
                     const arrowEndX = offsetX;
 
@@ -289,7 +287,7 @@
                 }
 
                 if (leftoverY > 0) {
-                    const arrowX = padding - 10;
+                    const arrowX = paddingX - 10;
                     const arrowStartY = offsetY - leftoverY * scale;
                     const arrowEndY = offsetY;
 
@@ -308,7 +306,7 @@
                     ctx.stroke();
 
                     ctx.save();
-                    ctx.translate(padding - 15, (arrowStartY + arrowEndY) / 2);
+                    ctx.translate(paddingX - 15, (arrowStartY + arrowEndY) / 2);
                     ctx.rotate(-Math.PI / 2);
                     ctx.fillText(`Leftover ${leftoverY.toFixed(2)} m`, 0, 0);
                     ctx.restore();
@@ -317,36 +315,21 @@
                 const leftover = leftoverX > 0 ? leftoverX : leftoverY;
 
                 ctx.font = "16px sans-serif";
-                ctx.fillText(`W: ${ledWidth.toFixed(2)} m / ${pixelWidth} px`, padding + boxW / 2, padding + boxH + 25);
+                ctx.fillText(`W: ${ledWidth.toFixed(2)} m / ${pixelWidth} px`, paddingX + boxW / 2, paddingY + boxH + 25);
                 ctx.save();
-                ctx.translate(padding + boxW + 25, padding + boxH / 2);
+                ctx.translate(paddingX + boxW + 25, paddingY + boxH / 2);
                 ctx.rotate(-Math.PI / 2);
                 ctx.fillText(`H: ${ledHeight.toFixed(2)} m / ${pixelHeight} px`, 0, 0);
                 ctx.restore();
 
                 document.getElementById("info").innerHTML = `
-                <div class="download-info">Double Click/Tap Image to Download</div>
-                <div class='grid'>
-                    <div>
-                        <strong>Pitch Resolution:</strong><br/>
-                        ${pitch} mm <br/>
-                        ${pitchPixel} px/m
+                    <div class="download-info">Double Click/Tap Image to Download</div>
+                    <div class='grid'>
+                        <div><strong>Pitch Resolution:</strong><br/>${pitch} mm <br/>${pitchPixel} px/m</div>
+                        <div><strong>LED Size:</strong><br/>${ledWidth.toFixed(2)} m x ${ledHeight.toFixed(2)} m <br/>(${pixelWidth} px x ${pixelHeight} px)</div>
+                        <div><strong>16:9 Content Size:</strong><br/>${contentWidth.toFixed(2)} m x ${contentHeight.toFixed(2)} m <br/>(${contentPixelWidth} px x ${contentPixelHeight} px)</div>
+                        <div><strong>Leftover:</strong><br/>${leftover.toFixed(2)} m</div>
                     </div>
-                    <div>
-                        <strong>LED Size:</strong><br/>
-                        ${ledWidth.toFixed(2)} m x ${ledHeight.toFixed(2)} m <br/>
-                        (${pixelWidth} px x ${pixelHeight} px)
-                    </div>
-                    <div>
-                        <strong>16:9 Content Size:</strong><br/>
-                        ${contentWidth.toFixed(2)} m x ${contentHeight.toFixed(2)} m <br/>
-                        (${contentPixelWidth} px x ${contentPixelHeight} px)
-                    </div>
-                    <div>
-                        <strong>Leftover:</strong><br/>
-                        ${leftover.toFixed(2)} m
-                    </div>
-                </div>
                 `;
             }
 

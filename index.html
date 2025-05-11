@@ -35,6 +35,12 @@
                 margin-top: 20px;
             }
 
+            .download-info {
+                font-size: 14px;
+                text-align: center;
+                margin-bottom: 20px;
+            }
+
             .footer {
                 position: relative;
                 bottom: 0;
@@ -319,6 +325,7 @@
                 ctx.restore();
 
                 document.getElementById("info").innerHTML = `
+                <div class="download-info">Double Click/Tap Image to Download</div>
                 <div class='grid'>
                     <div>
                         <strong>Pitch Resolution:</strong><br/>
@@ -347,6 +354,16 @@
                 const W = parseFloat(document.getElementById("inputW").value);
                 const H = parseFloat(document.getElementById("inputH").value);
                 if (W && H) calculate();
+            });
+
+            const canvas = document.getElementById("ledCanvas");
+
+            canvas.addEventListener("dblclick", function () {
+                const link = document.createElement("a");
+                console.log(this);
+                link.download = "led-calculation.png";
+                link.href = this.toDataURL("image/png");
+                link.click();
             });
 
             const buttonTheme = document.querySelector(".theme-toggle");

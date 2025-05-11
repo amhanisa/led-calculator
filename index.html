@@ -131,8 +131,8 @@
                     return {
                         background: "#13171f",
                         box: "#13171f",
-                        content: "#29a8e0",
-                        textBg: "#29a8e0",
+                        content: "#0172ad",
+                        textBg: "#0172ad",
                         textColor: "#ffffff",
                         stroke: "#ffffff",
                         leftover: "red",
@@ -141,8 +141,8 @@
                     return {
                         background: "#ffffff",
                         box: "#ffffff",
-                        content: "#29a8e0",
-                        textBg: "#29a8e0",
+                        content: "#0172ad",
+                        textBg: "#0172ad",
                         textColor: "#ffffff",
                         stroke: "#000000",
                         leftover: "red",
@@ -355,6 +355,9 @@
             function setTheme(theme) {
                 html.setAttribute("data-theme", theme);
                 localStorage.setItem("theme", theme);
+                if (theme == "dark") {
+                    buttonTheme.classList.add("theme-toggle--toggled");
+                }
                 if (document.getElementById("inputW").value && document.getElementById("inputH").value) {
                     calculate(); // redraw canvas after theme change
                 }

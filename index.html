@@ -106,6 +106,10 @@
                             <option value="3.91">P3.9 (3.91 mm)</option>
                         </select>
                     </label>
+                    <label>
+                        <input type="checkbox" id="showPerson" />
+                        Tampilkan perbandingan orang (165 cm)
+                    </label>
                 </div>
                 <div class="grid">
                     <button type="button" onclick="calculate()">Calculate</button>
@@ -217,18 +221,15 @@
                 const offsetX = paddingX + leftoverX * scale;
                 const offsetY = paddingY + leftoverY * scale;
 
-                // LED box
                 ctx.fillStyle = colors.box;
                 ctx.fillRect(paddingX, paddingY, boxW, boxH);
                 ctx.strokeStyle = colors.stroke;
                 ctx.lineWidth = 4;
                 ctx.strokeRect(paddingX - 2, paddingY - 2, boxW + 4, boxH + 4);
 
-                // 16:9 content area
                 ctx.fillStyle = colors.content;
                 ctx.fillRect(offsetX, offsetY, contentW, contentH);
 
-                // Diagonal lines in content
                 ctx.strokeStyle = colors.textColor;
                 ctx.setLineDash([5, 5]);
                 ctx.lineWidth = 1;
@@ -240,7 +241,6 @@
                 ctx.stroke();
                 ctx.setLineDash([]);
 
-                // Center label
                 const textLines = ["16:9 Content", `${contentWidth.toFixed(2)} m x ${contentHeight.toFixed(2)} m`, `${contentPixelWidth} px x ${contentPixelHeight} px`];
                 ctx.font = "12px sans-serif";
                 ctx.textAlign = "center";
@@ -259,10 +259,6 @@
                 for (let i = 0; i < textLines.length; i++) {
                     ctx.fillText(textLines[i], textX, textY + i * textHeight + 3);
                 }
-
-                // Leftover arrows
-                ctx.fillStyle = colors.stroke;
-                ctx.font = "12px sans-serif";
 
                 if (leftoverX > 0) {
                     const arrowY = paddingY - 10;
@@ -322,17 +318,76 @@
                 ctx.fillText(`H: ${ledHeight.toFixed(2)} m / ${pixelHeight} px`, 0, 0);
                 ctx.restore();
 
-                document.getElementById("info").innerHTML = `
-                    <div class="download-info">Double Click/Tap Image to Download</div>
-                    <div class='grid'>
-                        <div><strong>Pitch Resolution:</strong><br/>${pitch} mm <br/>${pitchPixel} px/m</div>
-                        <div><strong>LED Size:</strong><br/>${ledWidth.toFixed(2)} m x ${ledHeight.toFixed(2)} m <br/>(${pixelWidth} px x ${pixelHeight} px)</div>
-                        <div><strong>16:9 Content Size:</strong><br/>${contentWidth.toFixed(2)} m x ${contentHeight.toFixed(2)} m <br/>(${contentPixelWidth} px x ${contentPixelHeight} px)</div>
-                        <div><strong>Leftover:</strong><br/>${leftover.toFixed(2)} m</div>
-                    </div>
-                `;
-            }
+                // ✅ Tambahkan siluet orang realistis jika checkbox dicentang
+                if (document.getElementById("showPerson").checked) {
+                    const personHeightM = 1.65; // 165 cm
+                    const personHeightPx = personHeightM * scale;
+                    const personX = paddingX - 60;
+                    const personBottomY = paddingY + boxH;
+                    const personTopY = personBottomY - personHeightPx;
 
+                    ctx.strokeStyle = "#333";
+                    ctx.lineWidth = 2;
+
+                    // Kepala
+                    const headRadius = 0.1 * personHeightPx;
+                    ctx.beginPath();
+                    ctx.arc(personX + 10, personTopY + headRadius, headRadius, 0, Math.PI * 2);
+                    ctx.stroke();
+
+                    // Badan
+                    ctx.beginPath();
+                    ctx.moveTo(personX + 10, personTopY + headRadius * 2);
+                    ctx.lineTo(personX + 10, personTopY + personHeightPx * 0.7);
+                    ctx.stroke();
+
+                    // Tangan
+                    ctx.beginPath();
+                    ctx.moveTo(personX + 10, personTopY + personHeightPx * 0.3);
+                    ctx.lineTo(personX - 5, personTopY + personHeightPx * 0.45);
+                    ctx.moveTo(personX + 10, personTopY + personHeightPx * 0.3);
+                    ctx.lineTo(personX + 25, personTopY + personHeightPx * 0.45);
+                    ctx.stroke();
+
+                    // Kaki
+                    ctx.beginPath();
+                    ctx.moveTo(personX + 10, personTopY + personHeightPx * 0.7);
+                    ctx.lineTo(personX, personBottomY);
+                    ctx.moveTo(personX + 10, personTopY + personHeightPx * 0.7);
+                    ctx.lineTo(personX + 20, personBottomY);
+                    ctx.stroke();
+
+                    // Garis tinggi dan label
+                    ctx.strokeStyle = "#999";
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(personX - 10, personBottomY);
+                    ctx.lineTo(personX - 10, personTopY);
+                    ctx.stroke();
+
+                    ctx.beginPath();
+                    ctx.moveTo(personX - 15, personTopY);
+                    ctx.lineTo(personX - 5, personTopY);
+                    ctx.moveTo(personX - 15, personBottomY);
+                    ctx.lineTo(personX - 5, personBottomY);
+                    ctx.stroke();
+
+                    ctx.font = "12px sans-serif";
+                    ctx.fillStyle = "#000";
+                    ctx.textAlign = "right";
+                    ctx.fillText("1.65 m", personX - 15, personTopY + personHeightPx / 2 + 4);
+                }
+
+                document.getElementById("info").innerHTML = `
+        <div class="download-info">Double Click/Tap Image to Download</div>
+        <div class='grid'>
+            <div><strong>Pitch Resolution:</strong><br/>${pitch} mm <br/>${pitchPixel} px/m</div>
+            <div><strong>LED Size:</strong><br/>${ledWidth.toFixed(2)} m x ${ledHeight.toFixed(2)} m <br/>(${pixelWidth} px x ${pixelHeight} px)</div>
+            <div><strong>16:9 Content Size:</strong><br/>${contentWidth.toFixed(2)} m x ${contentHeight.toFixed(2)} m <br/>(${contentPixelWidth} px x ${contentPixelHeight} px)</div>
+            <div><strong>Leftover:</strong><br/>${leftover.toFixed(2)} m</div>
+        </div>
+    `;
+            }
             window.addEventListener("resize", () => {
                 const W = parseFloat(document.getElementById("inputW").value);
                 const H = parseFloat(document.getElementById("inputH").value);

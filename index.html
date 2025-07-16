@@ -64,6 +64,10 @@
             .icon-github {
                 margin-top: 10px;
             }
+
+            .text-muted {
+                color: #5c6370;
+            }
         </style>
         <!-- Google tag (gtag.js) -->
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-V1LW83PSFK"></script>
@@ -339,7 +343,7 @@
                             ${ledWidth} cm x ${ledHeight} cm <br/>(${pixelWidth} px x ${pixelHeight} px)
                         </div>
                         <div class="result"><strong>Pitch Resolution:</strong><br/>${pitch} mm <br/>${pitchPixel} px/m</div>
-                        <div class="result"><strong>16:9 Content Size:</strong><br/>${contentWidth} cm x ${contentHeight} cm <br/>(${contentPixelWidth} px x ${contentPixelHeight} px)</div>
+                        <div class="result"><strong>16:9 Content Size:</strong><br/>${contentWidth} cm x ${contentHeight} cm <br/> <small class="text-muted">(${contentPixelWidth} px x ${contentPixelHeight} px)</small></div>
                         <div class="result"><strong>Leftover:</strong><br/>${leftover} cm</div>
                     </div>
                 `;

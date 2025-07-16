@@ -42,6 +42,16 @@
                 margin-bottom: 20px;
             }
 
+            .result {
+                padding: 20px 20px;
+            }
+
+            .led-size-result {
+                border: 2px solid #0172ad;
+                background-color: rgb(13, 16, 20);
+                border-radius: 10px;
+            }
+
             .footer {
                 position: relative;
                 bottom: 0;
@@ -325,10 +335,12 @@
                 document.getElementById("info").innerHTML = `
                     <div class="download-info">Double Click/Tap Image to Download</div>
                     <div class='grid'>
-                        <div><strong>Pitch Resolution:</strong><br/>${pitch} mm <br/>${pitchPixel} px/m</div>
-                        <div><strong>LED Size:</strong><br/>${ledWidth} cm x ${ledHeight} cm <br/>(${pixelWidth} px x ${pixelHeight} px)</div>
-                        <div><strong>16:9 Content Size:</strong><br/>${contentWidth} cm x ${contentHeight} cm <br/>(${contentPixelWidth} px x ${contentPixelHeight} px)</div>
-                        <div><strong>Leftover:</strong><br/>${leftover} cm</div>
+                        <div class="result led-size-result"><strong>LED Size:</strong><br/>
+                            ${ledWidth} cm x ${ledHeight} cm <br/>(${pixelWidth} px x ${pixelHeight} px)
+                        </div>
+                        <div class="result"><strong>Pitch Resolution:</strong><br/>${pitch} mm <br/>${pitchPixel} px/m</div>
+                        <div class="result"><strong>16:9 Content Size:</strong><br/>${contentWidth} cm x ${contentHeight} cm <br/>(${contentPixelWidth} px x ${contentPixelHeight} px)</div>
+                        <div class="result"><strong>Leftover:</strong><br/>${leftover} cm</div>
                     </div>
                 `;
             }

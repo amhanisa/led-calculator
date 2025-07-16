@@ -96,8 +96,8 @@
 
             <div>
                 <div class="grid" style="grid-row-gap: 0">
-                    <label>LED Width (W) in meter: <input type="number" id="inputW" step="0.25" /></label>
-                    <label>LED Height (H) in meter: <input type="number" id="inputH" step="0.25" /></label>
+                    <label>LED Width (W) in cm: <input type="number" id="inputW" step="25" /></label>
+                    <label>LED Height (H) in cm: <input type="number" id="inputH" step="25" /></label>
                     <label for="pitch">
                         LED Pitch
                         <select id="pitch">
@@ -207,10 +207,10 @@
                 }
 
                 const pitchPixel = Math.round(1000 / pitch);
-                const pixelWidth = Math.round(ledWidth * pitchPixel);
-                const pixelHeight = Math.round(ledHeight * pitchPixel);
-                const contentPixelWidth = Math.round(contentWidth * pitchPixel);
-                const contentPixelHeight = Math.round(contentHeight * pitchPixel);
+                const pixelWidth = Math.round((ledWidth / 100) * pitchPixel);
+                const pixelHeight = Math.round((ledHeight / 100) * pitchPixel);
+                const contentPixelWidth = Math.round((contentWidth / 100) * pitchPixel);
+                const contentPixelHeight = Math.round((contentHeight / 100) * pitchPixel);
 
                 const contentW = contentWidth * scale;
                 const contentH = contentHeight * scale;
@@ -241,7 +241,7 @@
                 ctx.setLineDash([]);
 
                 // Center label
-                const textLines = ["16:9 Content", `${contentWidth.toFixed(2)} m x ${contentHeight.toFixed(2)} m`, `${contentPixelWidth} px x ${contentPixelHeight} px`];
+                const textLines = ["16:9 Content", `${contentWidth} cm x ${contentHeight} cm`, `${contentPixelWidth} px x ${contentPixelHeight} px`];
                 ctx.font = "12px sans-serif";
                 ctx.textAlign = "center";
                 const textHeight = 14;
@@ -283,7 +283,7 @@
                     ctx.lineTo(arrowEndX, arrowY + 3);
                     ctx.stroke();
 
-                    ctx.fillText(`Leftover ${leftoverX.toFixed(2)} m`, (arrowStartX + arrowEndX) / 2, arrowY - 5);
+                    ctx.fillText(`Leftover ${leftoverX} cm`, (arrowStartX + arrowEndX) / 2, arrowY - 5);
                 }
 
                 if (leftoverY > 0) {
@@ -308,27 +308,27 @@
                     ctx.save();
                     ctx.translate(paddingX - 15, (arrowStartY + arrowEndY) / 2);
                     ctx.rotate(-Math.PI / 2);
-                    ctx.fillText(`Leftover ${leftoverY.toFixed(2)} m`, 0, 0);
+                    ctx.fillText(`Leftover ${leftoverY} cm`, 0, 0);
                     ctx.restore();
                 }
 
                 const leftover = leftoverX > 0 ? leftoverX : leftoverY;
 
                 ctx.font = "16px sans-serif";
-                ctx.fillText(`W: ${ledWidth.toFixed(2)} m / ${pixelWidth} px`, paddingX + boxW / 2, paddingY + boxH + 25);
+                ctx.fillText(`W: ${ledWidth} cm / ${pixelWidth} px`, paddingX + boxW / 2, paddingY + boxH + 25);
                 ctx.save();
                 ctx.translate(paddingX + boxW + 25, paddingY + boxH / 2);
                 ctx.rotate(-Math.PI / 2);
-                ctx.fillText(`H: ${ledHeight.toFixed(2)} m / ${pixelHeight} px`, 0, 0);
+                ctx.fillText(`H: ${ledHeight} cm / ${pixelHeight} px`, 0, 0);
                 ctx.restore();
 
                 document.getElementById("info").innerHTML = `
                     <div class="download-info">Double Click/Tap Image to Download</div>
                     <div class='grid'>
                         <div><strong>Pitch Resolution:</strong><br/>${pitch} mm <br/>${pitchPixel} px/m</div>
-                        <div><strong>LED Size:</strong><br/>${ledWidth.toFixed(2)} m x ${ledHeight.toFixed(2)} m <br/>(${pixelWidth} px x ${pixelHeight} px)</div>
-                        <div><strong>16:9 Content Size:</strong><br/>${contentWidth.toFixed(2)} m x ${contentHeight.toFixed(2)} m <br/>(${contentPixelWidth} px x ${contentPixelHeight} px)</div>
-                        <div><strong>Leftover:</strong><br/>${leftover.toFixed(2)} m</div>
+                        <div><strong>LED Size:</strong><br/>${ledWidth} cm x ${ledHeight} cm <br/>(${pixelWidth} px x ${pixelHeight} px)</div>
+                        <div><strong>16:9 Content Size:</strong><br/>${contentWidth} cm x ${contentHeight} cm <br/>(${contentPixelWidth} px x ${contentPixelHeight} px)</div>
+                        <div><strong>Leftover:</strong><br/>${leftover} cm</div>
                     </div>
                 `;
             }

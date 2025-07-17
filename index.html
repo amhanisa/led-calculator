@@ -332,7 +332,7 @@
                     ctx.save();
                     ctx.translate(paddingX - 15, (arrowStartY + arrowEndY) / 2);
                     ctx.rotate(-Math.PI / 2);
-                    ctx.fillText(`Leftover ${leftoverY} cm`, 0, 0);
+                    ctx.fillText(`Leftover ${leftoverY.toFixed(2).replace(/[.,]00$/, "")} cm`, 0, 0);
                     ctx.restore();
                 }
 

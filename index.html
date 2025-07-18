@@ -463,6 +463,18 @@
                     for (let i = 0; i < textLines.length; i++) {
                         ctx.fillText(textLines[i], textX, textY + i * textHeight + 3);
                     }
+                } else {
+                    // Draw centered text with LED pixel size if preview is disabled
+                    ctx.font = "bold 20px sans-serif";
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "middle";
+                    ctx.fillStyle = colors.textColor;
+                    const centerX = ledOffsetX + ledDrawWidth / 2;
+                    const centerY = ledOffsetY + ledDrawHeight / 2;
+
+                    // Draw LED size in cm above the pixel size
+                    ctx.fillText(`${ledWidth} cm x ${ledHeight} cm`, centerX, centerY - 16);
+                    ctx.fillText(`${pixelWidth} px x ${pixelHeight} px`, centerX, centerY + 12);
                 }
 
                 // Draw width and height labels (always shown)

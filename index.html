@@ -373,23 +373,6 @@
                 ctx.lineWidth = 4;
                 ctx.strokeRect(ledOffsetX - 2, ledOffsetY - 2, ledDrawWidth + 4, ledDrawHeight + 4);
 
-                // Draw overflow area in red (cover mode)
-                if (fitMode === "cover") {
-                    ctx.save();
-                    ctx.globalAlpha = 0.4;
-                    ctx.fillStyle = "red";
-                    // Area di luar LED box (4 sisi)
-                    // Kiri
-                    ctx.fillRect(0, 0, ledOffsetX, canvasHeight);
-                    // Kanan
-                    ctx.fillRect(ledOffsetX + ledDrawWidth, 0, canvasWidth - (ledOffsetX + ledDrawWidth), canvasHeight);
-                    // Atas
-                    ctx.fillRect(ledOffsetX, 0, ledDrawWidth, ledOffsetY);
-                    // Bawah
-                    ctx.fillRect(ledOffsetX, ledOffsetY + ledDrawHeight, ledDrawWidth, canvasHeight - (ledOffsetY + ledDrawHeight));
-                    ctx.restore();
-                }
-
                 // Draw content area (16:9 or 9:16) - warna biru hanya untuk bagian yang di dalam LED box
                 if (fitMode === "cover") {
                     // Bagian dalam LED box (biru)

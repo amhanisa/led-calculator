@@ -694,6 +694,29 @@
                 const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
                 setTheme(prefersDark ? "dark" : "light");
             }
+
+            // Save preview enabled state to localStorage when changed
+            document.getElementById("previewContent").addEventListener("change", function () {
+                const disabled = !this.checked;
+                // Disable/enable all radio buttons for orientation and fit
+                document.querySelectorAll('input[name="content-orientation"]').forEach((el) => (el.disabled = disabled));
+                document.querySelectorAll('input[name="content-fit"]').forEach((el) => (el.disabled = disabled));
+                // Save to localStorage
+                localStorage.setItem("previewEnabled", this.checked ? "1" : "0");
+            });
+
+            // Initialize state on page load
+            window.addEventListener("DOMContentLoaded", function () {
+                // Load preview enabled state from localStorage
+                const previewContent = document.getElementById("previewContent");
+                const savedPreview = localStorage.getItem("previewEnabled");
+                if (savedPreview !== null) {
+                    previewContent.checked = savedPreview === "1";
+                }
+                const disabled = !previewContent.checked;
+                document.querySelectorAll('input[name="content-orientation"]').forEach((el) => (el.disabled = disabled));
+                document.querySelectorAll('input[name="content-fit"]').forEach((el) => (el.disabled = disabled));
+            });
         </script>
     </body>
 </html>

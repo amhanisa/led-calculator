@@ -46,6 +46,12 @@
                 padding: 20px 20px;
             }
 
+            @media screen and (max-width: 768px) {
+                .result {
+                    padding: 10px 15px;
+                }
+            }
+
             .led-size-result {
                 border: 2px solid #0172ad;
                 background-color: rgb(13, 16, 20);
@@ -127,6 +133,15 @@
                         </select>
                     </label>
                 </div>
+                <div class="grid" style="grid-row-gap: 0">
+                    <fieldset>
+                        <legend>Preview Orientation:</legend>
+                        <input type="radio" value="landscape" name="content-orientation" checked />
+                        <label>Landscape</label>
+                        <input type="radio" value="potrait" name="content-orientation" />
+                        <label>Potrait</label>
+                    </fieldset>
+                </div>
                 <div class="grid">
                     <button type="button" onclick="calculate()">Calculate</button>
                 </div>
@@ -181,6 +196,7 @@
                 const ledWidth = parseFloat(document.getElementById("inputW").value);
                 const ledHeight = parseFloat(document.getElementById("inputH").value);
                 const pitch = parseFloat(document.getElementById("pitch").value);
+                const previewOrientation = document.querySelector('input[name="content-orientation"]:checked').value;
 
                 if (!ledWidth || !ledHeight || ledWidth <= 0 || ledHeight <= 0) {
                     alert("Please enter valid values for Width and Height.");
@@ -214,8 +230,18 @@
                 const paddingX = padding.left;
                 const paddingY = padding.top;
 
-                let contentWidth = (16 / 9) * ledHeight;
-                let contentHeight = ledHeight;
+                let contentWidth;
+                let contentHeight;
+
+                // checkOrientation
+                if (previewOrientation === "landscape") {
+                    contentWidth = (16 / 9) * ledHeight;
+                    contentHeight = ledHeight;
+                } else {
+                    contentWidth = (9 / 16) * ledHeight;
+                    contentHeight = ledHeight;
+                }
+
                 let leftoverX = (ledWidth - contentWidth) / 2;
                 let leftoverY = 0;
 

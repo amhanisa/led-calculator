@@ -138,12 +138,12 @@
                         <legend>Preview Orientation:</legend>
                         <input type="radio" value="landscape" name="content-orientation" checked />
                         <label>Landscape</label>
-                        <input type="radio" value="potrait" name="content-orientation" />
-                        <label>Potrait</label>
+                        <input type="radio" value="portrait" name="content-orientation" />
+                        <label>Portrait</label>
                     </fieldset>
                 </div>
                 <div class="grid">
-                    <button type="button" onclick="calculate()">Calculate</button>
+                    <button type="button">Calculate</button>
                 </div>
             </div>
 
@@ -167,6 +167,7 @@
         </main>
 
         <script>
+            // Get theme colors for canvas based on current theme
             function getThemeColors() {
                 const theme = document.documentElement.getAttribute("data-theme");
                 if (theme === "dark") {
@@ -192,6 +193,7 @@
                 }
             }
 
+            // Main calculation function, called on button click
             function calculate() {
                 const ledWidth = parseFloat(document.getElementById("inputW").value);
                 const ledHeight = parseFloat(document.getElementById("inputH").value);
@@ -250,6 +252,8 @@
                     leftover,
                 });
             }
+
+            // Validate user input for width and height
             function validateInput(w, h) {
                 if (!w || !h || w <= 0 || h <= 0) {
                     alert("Please enter valid values for Width and Height.");
@@ -258,10 +262,12 @@
                 return true;
             }
 
+            // Format number for display (e.g., 100.00 -> 100)
             function formatNumber(num) {
                 return num.toFixed(2).replace(/[.,]00$/, "");
             }
 
+            // Calculate 16:9 content size and leftover area
             function calculateContentSize(ledWidth, ledHeight, orientation) {
                 let contentWidth, contentHeight, leftoverX, leftoverY;
                 if (orientation === "landscape") {
@@ -292,6 +298,7 @@
                 return { contentWidth, contentHeight, leftoverX, leftoverY };
             }
 
+            // Render the LED and content preview on canvas
             function renderCanvas({
                 ledWidth,
                 ledHeight,
@@ -432,6 +439,7 @@
                 ctx.restore();
             }
 
+            // Render the info panel below the canvas
             function renderInfo({ ledWidth, ledHeight, pixelWidth, pixelHeight, pitch, pitchPixel, contentWidth, contentHeight, contentPixelWidth, contentPixelHeight, leftover }) {
                 const ledSizeHtml = `
                     <div class="result led-size-result">
@@ -475,28 +483,12 @@
                 `;
             }
 
-            window.addEventListener("resize", () => {
-                const W = parseFloat(document.getElementById("inputW").value);
-                const H = parseFloat(document.getElementById("inputH").value);
-                if (W && H) calculate();
-            });
-
-            const canvas = document.getElementById("ledCanvas");
-
-            canvas.addEventListener("dblclick", function () {
-                const link = document.createElement("a");
-                console.log(this);
-                link.download = "led-calculation.png";
-                link.href = this.toDataURL("image/png");
-                link.click();
-            });
-
-            const buttonTheme = document.querySelector(".theme-toggle");
-            const html = document.documentElement;
-
+            // Set the theme (light/dark) and update UI
             function setTheme(theme) {
+                const html = document.documentElement;
                 html.setAttribute("data-theme", theme);
                 localStorage.setItem("theme", theme);
+                const buttonTheme = document.querySelector(".theme-toggle");
                 if (theme == "dark") {
                     buttonTheme.classList.add("theme-toggle--toggled");
                 }
@@ -505,14 +497,33 @@
                 }
             }
 
+            // Toggle between light and dark theme
             function toggleTheme() {
+                const html = document.documentElement;
                 const currentTheme = html.getAttribute("data-theme");
                 const newTheme = currentTheme === "light" ? "dark" : "light";
                 setTheme(newTheme);
+                const buttonTheme = document.querySelector(".theme-toggle");
                 buttonTheme.classList.toggle("theme-toggle--toggled", newTheme === "dark");
             }
 
-            buttonTheme.addEventListener("click", toggleTheme);
+            document.getElementById("ledCanvas").addEventListener("dblclick", function () {
+                const link = document.createElement("a");
+                console.log(this);
+                link.download = "led-calculation.png";
+                link.href = this.toDataURL("image/png");
+                link.click();
+            });
+
+            window.addEventListener("resize", () => {
+                const width = parseFloat(document.getElementById("inputW").value);
+                const height = parseFloat(document.getElementById("inputH").value);
+                if (width && height) calculate();
+            });
+
+            document.querySelector('button[type="button"]').addEventListener("click", calculate);
+
+            document.querySelector(".theme-toggle").addEventListener("click", toggleTheme);
 
             // Load theme from localStorage
             const savedTheme = localStorage.getItem("theme");

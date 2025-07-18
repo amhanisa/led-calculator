@@ -390,33 +390,66 @@
                     ctx.restore();
                 }
 
-                // Draw content area (16:9 or 9:16)
-                ctx.fillStyle = colors.content;
-                ctx.fillRect(contentOffsetX, contentOffsetY, contentDrawWidth, contentDrawHeight);
+                // Draw content area (16:9 or 9:16) - warna biru hanya untuk bagian yang di dalam LED box
+                if (fitMode === "cover") {
+                    // Bagian dalam LED box (biru)
+                    const intersectX = Math.max(contentOffsetX, ledOffsetX);
+                    const intersectY = Math.max(contentOffsetY, ledOffsetY);
+                    const intersectW = Math.max(0, Math.min(contentOffsetX + contentDrawWidth, ledOffsetX + ledDrawWidth) - intersectX);
+                    const intersectH = Math.max(0, Math.min(contentOffsetY + contentDrawHeight, ledOffsetY + ledDrawHeight) - intersectY);
+                    if (intersectW > 0 && intersectH > 0) {
+                        ctx.fillStyle = colors.content;
+                        ctx.fillRect(intersectX, intersectY, intersectW, intersectH);
+                    }
+
+                    // Bagian luar LED box (kuning)
+                    ctx.fillStyle = "yellow";
+                    // Kiri
+                    if (contentOffsetX < ledOffsetX) {
+                        ctx.fillRect(contentOffsetX, contentOffsetY, ledOffsetX - contentOffsetX, contentDrawHeight);
+                    }
+                    // Kanan
+                    if (contentOffsetX + contentDrawWidth > ledOffsetX + ledDrawWidth) {
+                        ctx.fillRect(ledOffsetX + ledDrawWidth, contentOffsetY, contentOffsetX + contentDrawWidth - (ledOffsetX + ledDrawWidth), contentDrawHeight);
+                    }
+                    // Atas
+                    if (contentOffsetY < ledOffsetY) {
+                        const left = Math.max(contentOffsetX, ledOffsetX);
+                        const right = Math.min(contentOffsetX + contentDrawWidth, ledOffsetX + ledDrawWidth);
+                        ctx.fillRect(left, contentOffsetY, right - left, ledOffsetY - contentOffsetY);
+                    }
+                    // Bawah
+                    if (contentOffsetY + contentDrawHeight > ledOffsetY + ledDrawHeight) {
+                        const left = Math.max(contentOffsetX, ledOffsetX);
+                        const right = Math.min(contentOffsetX + contentDrawWidth, ledOffsetX + ledDrawWidth);
+                        ctx.fillRect(left, ledOffsetY + ledDrawHeight, right - left, contentOffsetY + contentDrawHeight - (ledOffsetY + ledDrawHeight));
+                    }
+                } else {
+                    // Mode contain: seluruh content pasti di dalam LED box, cukup biru saja
+                    ctx.fillStyle = colors.content;
+                    ctx.fillRect(contentOffsetX, contentOffsetY, contentDrawWidth, contentDrawHeight);
+                }
 
                 // Highlight ONLY the part of content that is outside LED box (cover mode)
                 if (fitMode === "cover") {
                     ctx.save();
                     ctx.globalAlpha = 0.5;
                     ctx.beginPath();
-                    // Bagian kiri
+                    // Bagian kiri (hanya area biru di luar LED box)
                     if (contentOffsetX < ledOffsetX) {
-                        ctx.rect(contentOffsetX, contentOffsetY,
-                            ledOffsetX - contentOffsetX,
-                            contentDrawHeight);
+                        ctx.rect(contentOffsetX, contentOffsetY, Math.min(ledOffsetX, contentOffsetX + contentDrawWidth) - contentOffsetX, contentDrawHeight);
                     }
                     // Bagian kanan
                     if (contentOffsetX + contentDrawWidth > ledOffsetX + ledDrawWidth) {
                         ctx.rect(
-                            ledOffsetX + ledDrawWidth,
+                            Math.max(ledOffsetX + ledDrawWidth, contentOffsetX),
                             contentOffsetY,
-                            (contentOffsetX + contentDrawWidth) - (ledOffsetX + ledDrawWidth),
+                            contentOffsetX + contentDrawWidth - Math.max(ledOffsetX + ledDrawWidth, contentOffsetX),
                             contentDrawHeight
                         );
                     }
                     // Bagian atas
                     if (contentOffsetY < ledOffsetY) {
-                        // Hindari double rect di pojok, jadi width = overlap dengan LED box
                         const left = Math.max(contentOffsetX, ledOffsetX);
                         const right = Math.min(contentOffsetX + contentDrawWidth, ledOffsetX + ledDrawWidth);
                         ctx.rect(left, contentOffsetY, right - left, ledOffsetY - contentOffsetY);
@@ -425,12 +458,7 @@
                     if (contentOffsetY + contentDrawHeight > ledOffsetY + ledDrawHeight) {
                         const left = Math.max(contentOffsetX, ledOffsetX);
                         const right = Math.min(contentOffsetX + contentDrawWidth, ledOffsetX + ledDrawWidth);
-                        ctx.rect(
-                            left,
-                            ledOffsetY + ledDrawHeight,
-                            right - left,
-                            (contentOffsetY + contentDrawHeight) - (ledOffsetY + ledDrawHeight)
-                        );
+                        ctx.rect(left, ledOffsetY + ledDrawHeight, right - left, contentOffsetY + contentDrawHeight - (ledOffsetY + ledDrawHeight));
                     }
                     ctx.fillStyle = "red";
                     ctx.fill();

@@ -387,8 +387,11 @@
                         ctx.fillRect(intersectX, intersectY, intersectW, intersectH);
                     }
 
-                    // Bagian luar LED box (kuning)
+                    // Bagian luar LED box (overflow, merah transparan)
+                    ctx.save();
+                    ctx.globalAlpha = 0.5; // <-- tambahkan ini
                     ctx.fillStyle = "#870000";
+
                     // Kiri
                     if (contentOffsetX < ledOffsetX) {
                         ctx.fillRect(contentOffsetX, contentOffsetY, ledOffsetX - contentOffsetX, contentDrawHeight);
@@ -409,6 +412,7 @@
                         const right = Math.min(contentOffsetX + contentDrawWidth, ledOffsetX + ledDrawWidth);
                         ctx.fillRect(left, ledOffsetY + ledDrawHeight, right - left, contentOffsetY + contentDrawHeight - (ledOffsetY + ledDrawHeight));
                     }
+                    ctx.restore(); // <-- kembalikan alpha ke normal
                 } else {
                     // Mode contain: seluruh content pasti di dalam LED box, cukup biru saja
                     ctx.fillStyle = colors.content;
@@ -488,7 +492,7 @@
                 ctx.font = "16px sans-serif";
                 ctx.fillStyle = colors.stroke;
                 ctx.textAlign = "center";
-                ctx.fillText(`W: ${ledWidth} cm / ${pixelWidth} px`, ledOffsetX + ledDrawWidth / 2, ledOffsetY + ledOffsetY + 25);
+                ctx.fillText(`W: ${ledWidth} cm / ${pixelWidth} px`, ledOffsetX + ledDrawWidth / 2, ledOffsetY + ledDrawHeight + 25);
                 ctx.save();
                 ctx.translate(ledOffsetX + ledDrawWidth + 25, ledOffsetY + ledDrawHeight / 2);
                 ctx.rotate(-Math.PI / 2);
@@ -552,7 +556,7 @@
                     if (contentDrawWidth - ledDrawWidth > 0) {
                         const y = ledOffsetY - 20;
                         const x1 = contentOffsetX;
-                        const x2 = contentOffsetX + overflow * scale; // <-- perbaiki di sini
+                        const x2 = contentOffsetX + overflow * scale;
                         ctx.beginPath();
                         ctx.moveTo(x1, y);
                         ctx.lineTo(x2, y);
@@ -565,7 +569,6 @@
                         ctx.lineTo(x2, y + 5);
                         ctx.stroke();
 
-                        // ctx.textAlign = "right";
                         ctx.fillText(`Overflow: ${formatNumber(overflow)} cm`, (x1 + x2) / 2, y - 8);
                     }
                     // Vertical overflow (panah di kiri LED box)
@@ -586,7 +589,6 @@
                         ctx.stroke();
 
                         ctx.save();
-                        // ctx.textAlign = "left";
                         ctx.translate(x, (y1 + y2) / 2);
                         ctx.rotate(-Math.PI / 2);
                         ctx.fillText(`Overflow: ${formatNumber(overflow)} cm`, 0, -8);

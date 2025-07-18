@@ -465,10 +465,10 @@
                     }
                 } else {
                     // Draw centered text with LED pixel size if preview is disabled
-                    ctx.font = "bold 20px sans-serif";
+                    ctx.font = "20px sans-serif";
                     ctx.textAlign = "center";
                     ctx.textBaseline = "middle";
-                    ctx.fillStyle = colors.textColor;
+                    ctx.fillStyle = colors.stroke;
                     const centerX = ledOffsetX + ledDrawWidth / 2;
                     const centerY = ledOffsetY + ledDrawHeight / 2;
 

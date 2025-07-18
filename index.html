@@ -257,16 +257,20 @@
                 const contentPixelHeight = Math.round((contentDrawHeight / ledScale / 100) * pitchPixel);
 
                 // 4. Hitung leftover/overflow (dalam cm)
-                let leftoverX = 0,
-                    leftoverY = 0,
-                    overflowX = 0,
-                    overflowY = 0;
+                let leftover = 0,
+                    overflow = 0;
                 if (fitMode === "contain") {
-                    leftoverX = Math.max(0, (ledDrawWidth - contentDrawWidth) / ledScale);
-                    leftoverY = Math.max(0, (ledDrawHeight - contentDrawHeight) / ledScale);
+                    if (ledDrawWidth - contentDrawWidth > 0) {
+                        leftover = (ledDrawWidth - contentDrawWidth) / ledScale / 2;
+                    } else if (ledDrawHeight - contentDrawHeight > 0) {
+                        leftover = (ledDrawHeight - contentDrawHeight) / ledScale / 2;
+                    }
                 } else {
-                    overflowX = Math.max(0, (contentDrawWidth - ledDrawWidth) / ledScale);
-                    overflowY = Math.max(0, (contentDrawHeight - ledDrawHeight) / ledScale);
+                    if (contentDrawWidth - ledDrawWidth > 0) {
+                        overflow = (contentDrawWidth - ledDrawWidth) / ledScale / 2;
+                    } else if (contentDrawHeight - ledDrawHeight > 0) {
+                        overflow = (contentDrawHeight - ledDrawHeight) / ledScale / 2;
+                    }
                 }
 
                 renderCanvas({
@@ -286,10 +290,8 @@
                     pixelHeight,
                     contentPixelWidth,
                     contentPixelHeight,
-                    leftoverX,
-                    leftoverY,
-                    overflowX,
-                    overflowY,
+                    leftover,
+                    overflow,
                     ledWidth,
                     ledHeight,
                     pitch,
@@ -309,7 +311,8 @@
                     contentHeight: contentDrawHeight / ledScale,
                     contentPixelWidth,
                     contentPixelHeight,
-                    leftover: fitMode === "contain" ? Math.max(leftoverX, leftoverY) : Math.max(overflowX, overflowY),
+                    leftover,
+                    overflow,
                     fitMode,
                 });
             }
@@ -346,10 +349,8 @@
                 pixelHeight,
                 contentPixelWidth,
                 contentPixelHeight,
-                leftoverX,
-                leftoverY,
-                overflowX,
-                overflowY,
+                leftover,
+                overflow,
                 ledWidth,
                 ledHeight,
                 scale,
@@ -487,7 +488,7 @@
                 ctx.font = "16px sans-serif";
                 ctx.fillStyle = colors.stroke;
                 ctx.textAlign = "center";
-                ctx.fillText(`W: ${ledWidth} cm / ${pixelWidth} px`, ledOffsetX + ledDrawWidth / 2, ledOffsetY + ledDrawHeight + 25);
+                ctx.fillText(`W: ${ledWidth} cm / ${pixelWidth} px`, ledOffsetX + ledDrawWidth / 2, ledOffsetY + ledOffsetY + 25);
                 ctx.save();
                 ctx.translate(ledOffsetX + ledDrawWidth + 25, ledOffsetY + ledDrawHeight / 2);
                 ctx.rotate(-Math.PI / 2);
@@ -501,117 +502,102 @@
                 ctx.lineWidth = 2;
                 ctx.font = "12px sans-serif";
 
-                // LEFTOVER (contain)
-                if (fitMode === "contain") {
-                    ctx.textAlign = "center";
+                if (fitMode === "contain" && leftover > 0) {
                     // Horizontal leftover (panah di atas LED box)
-                    if (leftoverX > 0) {
+                    if (ledDrawWidth - contentDrawWidth > 0) {
                         const y = ledOffsetY - 20;
-                        // Panah dari sisi kiri LED ke sisi kiri content (jika ada sisa di kiri)
-                        if (contentOffsetX > ledOffsetX) {
-                            const x1 = ledOffsetX;
-                            const x2 = contentOffsetX;
-                            ctx.beginPath();
-                            ctx.moveTo(x1, y);
-                            ctx.lineTo(x2, y);
-                            ctx.stroke();
+                        const x1 = ledOffsetX;
+                        const x2 = ledOffsetX + leftover * scale; // <-- perbaiki di sini
+                        ctx.beginPath();
+                        ctx.moveTo(x1, y);
+                        ctx.lineTo(x2, y);
+                        ctx.stroke();
 
-                            ctx.beginPath();
-                            ctx.moveTo(x1, y - 5);
-                            ctx.lineTo(x1, y + 5);
-                            ctx.moveTo(x2, y - 5);
-                            ctx.lineTo(x2, y + 5);
-                            ctx.stroke();
+                        ctx.beginPath();
+                        ctx.moveTo(x1, y - 5);
+                        ctx.lineTo(x1, y + 5);
+                        ctx.moveTo(x2, y - 5);
+                        ctx.lineTo(x2, y + 5);
+                        ctx.stroke();
 
-                            ctx.fillText(`Leftover: ${formatNumber(leftoverX)} cm`, (x1 + x2) / 2, y - 8);
-                        }
+                        ctx.fillText(`Leftover: ${formatNumber(leftover)} cm`, (x1 + x2) / 2, y - 8);
                     }
                     // Vertical leftover (panah di kiri LED box)
-                    if (leftoverY > 0) {
+                    if (ledDrawHeight - contentDrawHeight > 0) {
                         const x = ledOffsetX - 20;
-                        // Panah dari sisi atas LED ke sisi atas content
-                        if (contentOffsetY > ledOffsetY) {
-                            const y1 = ledOffsetY;
-                            const y2 = contentOffsetY;
-                            ctx.beginPath();
-                            ctx.moveTo(x, y1);
-                            ctx.lineTo(x, y2);
-                            ctx.stroke();
+                        const y1 = ledOffsetY;
+                        const y2 = ledOffsetY + leftover * scale; // <-- perbaiki di sini
+                        ctx.beginPath();
+                        ctx.moveTo(x, y1);
+                        ctx.lineTo(x, y2);
+                        ctx.stroke();
 
-                            ctx.beginPath();
-                            ctx.moveTo(x - 5, y1);
-                            ctx.lineTo(x + 5, y1);
-                            ctx.moveTo(x - 5, y2);
-                            ctx.lineTo(x + 5, y2);
-                            ctx.stroke();
+                        ctx.beginPath();
+                        ctx.moveTo(x - 5, y1);
+                        ctx.lineTo(x + 5, y1);
+                        ctx.moveTo(x - 5, y2);
+                        ctx.lineTo(x + 5, y2);
+                        ctx.stroke();
 
-                            ctx.save();
-                            ctx.translate(x - 10, (y1 + y2) / 2);
-                            ctx.rotate(-Math.PI / 2);
-                            ctx.fillText(`Leftover: ${formatNumber(leftoverY)} cm`, 0, 0);
-                            ctx.restore();
-                        }
+                        ctx.save();
+                        ctx.translate(x - 10, (y1 + y2) / 2);
+                        ctx.rotate(-Math.PI / 2);
+                        ctx.fillText(`Leftover: ${formatNumber(leftover)} cm`, 0, 0);
+                        ctx.restore();
                     }
                 }
 
-                // OVERFLOW (cover)
-                if (fitMode === "cover") {
+                if (fitMode === "cover" && overflow > 0) {
                     // Horizontal overflow (panah di atas LED box)
-                    if (overflowX > 0) {
+                    if (contentDrawWidth - ledDrawWidth > 0) {
                         const y = ledOffsetY - 20;
-                        // Overflow kiri
-                        if (contentOffsetX < ledOffsetX) {
-                            const x1 = contentOffsetX;
-                            const x2 = ledOffsetX;
-                            ctx.beginPath();
-                            ctx.moveTo(x1, y);
-                            ctx.lineTo(x2, y);
-                            ctx.stroke();
+                        const x1 = contentOffsetX;
+                        const x2 = contentOffsetX + overflow * scale; // <-- perbaiki di sini
+                        ctx.beginPath();
+                        ctx.moveTo(x1, y);
+                        ctx.lineTo(x2, y);
+                        ctx.stroke();
 
-                            ctx.beginPath();
-                            ctx.moveTo(x1, y - 5);
-                            ctx.lineTo(x1, y + 5);
-                            ctx.moveTo(x2, y - 5);
-                            ctx.lineTo(x2, y + 5);
-                            ctx.stroke();
+                        ctx.beginPath();
+                        ctx.moveTo(x1, y - 5);
+                        ctx.lineTo(x1, y + 5);
+                        ctx.moveTo(x2, y - 5);
+                        ctx.lineTo(x2, y + 5);
+                        ctx.stroke();
 
-                            ctx.textAlign = "right";
-                            ctx.fillText(`Overflow: ${formatNumber(overflowX)} cm`, x2, y - 8); // rata kanan, nempel LED box
-                        }
+                        // ctx.textAlign = "right";
+                        ctx.fillText(`Overflow: ${formatNumber(overflow)} cm`, (x1 + x2) / 2, y - 8);
                     }
                     // Vertical overflow (panah di kiri LED box)
-                    if (overflowY > 0) {
-                        const x = ledOffsetX - 20;
-                        // Overflow atas
-                        if (contentOffsetY < ledOffsetY) {
-                            const y1 = contentOffsetY;
-                            const y2 = ledOffsetY;
-                            ctx.beginPath();
-                            ctx.moveTo(x, y1);
-                            ctx.lineTo(x, y2);
-                            ctx.stroke();
+                    if (contentDrawHeight - ledDrawHeight > 0) {
+                        const x = contentOffsetX - 20;
+                        const y1 = contentOffsetY;
+                        const y2 = contentOffsetY + overflow * scale; // <-- perbaiki di sini
+                        ctx.beginPath();
+                        ctx.moveTo(x, y1);
+                        ctx.lineTo(x, y2);
+                        ctx.stroke();
 
-                            ctx.beginPath();
-                            ctx.moveTo(x - 5, y1);
-                            ctx.lineTo(x + 5, y1);
-                            ctx.moveTo(x - 5, y2);
-                            ctx.lineTo(x + 5, y2);
-                            ctx.stroke();
+                        ctx.beginPath();
+                        ctx.moveTo(x - 5, y1);
+                        ctx.lineTo(x + 5, y1);
+                        ctx.moveTo(x - 5, y2);
+                        ctx.lineTo(x + 5, y2);
+                        ctx.stroke();
 
-                            ctx.save();
-                            ctx.textAlign = "left";
-                            ctx.translate(x, y2);
-                            ctx.rotate(-Math.PI / 2);
-                            ctx.fillText(`Overflow: ${formatNumber(overflowY)} cm`, 0, -8); // rata kiri, nempel LED box
-                            ctx.restore();
-                        }
+                        ctx.save();
+                        // ctx.textAlign = "left";
+                        ctx.translate(x, (y1 + y2) / 2);
+                        ctx.rotate(-Math.PI / 2);
+                        ctx.fillText(`Overflow: ${formatNumber(overflow)} cm`, 0, -8);
+                        ctx.restore();
                     }
                 }
                 ctx.restore();
             }
 
             // Render the info panel below the canvas
-            function renderInfo({ ledWidth, ledHeight, pixelWidth, pixelHeight, pitch, pitchPixel, contentWidth, contentHeight, contentPixelWidth, contentPixelHeight, leftover, fitMode }) {
+            function renderInfo({ ledWidth, ledHeight, pixelWidth, pixelHeight, pitch, pitchPixel, contentWidth, contentHeight, contentPixelWidth, contentPixelHeight, leftover, overflow, fitMode }) {
                 const ledSizeHtml = `
                     <div class="result led-size-result">
                         <strong>LED Size:</strong><br/>
@@ -636,12 +622,11 @@
                     </div>
                 `;
 
-                const leftoverHtml = `
-                    <div class="result">
-                        <strong>${fitMode === "contain" ? "Leftover" : "Overflow"}:</strong><br/>
-                        ${formatNumber(leftover)} cm
-                    </div>
-                `;
+                const leftoverHtml =
+                    fitMode === "contain"
+                        ? `<div class="result"><strong>Leftover:</strong><br/>${formatNumber(leftover)} cm</div>`
+                        : `<div class="result"><strong>Overflow:</strong><br/>${formatNumber(overflow)} cm</div>`;
+
                 document.getElementById("info").innerHTML = `
                     <div class="download-info">Double Click/Tap Image to Download</div>
                     <div class='grid'>

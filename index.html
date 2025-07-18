@@ -198,15 +198,9 @@
                 const pitch = parseFloat(document.getElementById("pitch").value);
                 const previewOrientation = document.querySelector('input[name="content-orientation"]:checked').value;
 
-                if (!ledWidth || !ledHeight || ledWidth <= 0 || ledHeight <= 0) {
-                    alert("Please enter valid values for Width and Height.");
-                    return;
-                }
+                if (!validateInput(ledWidth, ledHeight)) return;
 
                 const colors = getThemeColors();
-                const canvas = document.getElementById("ledCanvas");
-                const ctx = canvas.getContext("2d");
-
                 const maxCanvasWidth = 1000;
                 const maxCanvasHeight = 600;
                 const padding = { top: 60, bottom: 60, left: 60, right: 60 };
@@ -215,26 +209,62 @@
                 const availableHeight = maxCanvasHeight - padding.top - padding.bottom;
                 const scale = Math.min(availableWidth / ledWidth, availableHeight / ledHeight);
 
-                const boxW = ledWidth * scale;
-                const boxH = ledHeight * scale;
-                const canvasWidth = boxW + padding.left + padding.right;
-                const canvasHeight = boxH + padding.top + padding.bottom;
+                const { contentWidth, contentHeight, leftoverX, leftoverY } = calculateContentSize(ledWidth, ledHeight, previewOrientation);
 
-                canvas.width = canvasWidth;
-                canvas.height = canvasHeight;
+                const pitchPixel = Math.round(1000 / pitch);
+                const pixelWidth = Math.round((ledWidth / 100) * pitchPixel);
+                const pixelHeight = Math.round((ledHeight / 100) * pitchPixel);
+                const contentPixelWidth = Math.round((contentWidth / 100) * pitchPixel);
+                const contentPixelHeight = Math.round((contentHeight / 100) * pitchPixel);
 
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = colors.background;
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                renderCanvas({
+                    ledWidth,
+                    ledHeight,
+                    contentWidth,
+                    contentHeight,
+                    leftoverX,
+                    leftoverY,
+                    pitch,
+                    colors,
+                    scale,
+                    padding,
+                    pixelWidth,
+                    pixelHeight,
+                    contentPixelWidth,
+                    contentPixelHeight,
+                });
 
-                const paddingX = padding.left;
-                const paddingY = padding.top;
+                const leftover = leftoverX > 0 ? leftoverX : leftoverY;
 
-                let contentWidth;
-                let contentHeight;
+                renderInfo({
+                    ledWidth,
+                    ledHeight,
+                    pixelWidth,
+                    pixelHeight,
+                    pitch,
+                    pitchPixel,
+                    contentWidth,
+                    contentHeight,
+                    contentPixelWidth,
+                    contentPixelHeight,
+                    leftover,
+                });
+            }
+            function validateInput(w, h) {
+                if (!w || !h || w <= 0 || h <= 0) {
+                    alert("Please enter valid values for Width and Height.");
+                    return false;
+                }
+                return true;
+            }
 
-                // checkOrientation
-                if (previewOrientation === "landscape") {
+            function formatNumber(num) {
+                return num.toFixed(2).replace(/[.,]00$/, "");
+            }
+
+            function calculateContentSize(ledWidth, ledHeight, orientation) {
+                let contentWidth, contentHeight, leftoverX, leftoverY;
+                if (orientation === "landscape") {
                     contentWidth = (16 / 9) * ledHeight;
                     contentHeight = ledHeight;
                     if (contentWidth > ledWidth) {
@@ -259,17 +289,44 @@
                         leftoverY = 0;
                     }
                 }
+                return { contentWidth, contentHeight, leftoverX, leftoverY };
+            }
 
-                const pitchPixel = Math.round(1000 / pitch);
-                const pixelWidth = Math.round((ledWidth / 100) * pitchPixel);
-                const pixelHeight = Math.round((ledHeight / 100) * pitchPixel);
-                const contentPixelWidth = Math.round((contentWidth / 100) * pitchPixel);
-                const contentPixelHeight = Math.round((contentHeight / 100) * pitchPixel);
+            function renderCanvas({
+                ledWidth,
+                ledHeight,
+                contentWidth,
+                contentHeight,
+                leftoverX,
+                leftoverY,
+                pitch,
+                colors,
+                scale,
+                padding,
+                pixelWidth,
+                pixelHeight,
+                contentPixelWidth,
+                contentPixelHeight,
+            }) {
+                const canvas = document.getElementById("ledCanvas");
+                const ctx = canvas.getContext("2d");
 
+                const boxW = ledWidth * scale;
+                const boxH = ledHeight * scale;
+                const paddingX = padding.left;
+                const paddingY = padding.top;
                 const contentW = contentWidth * scale;
                 const contentH = contentHeight * scale;
                 const offsetX = paddingX + leftoverX * scale;
                 const offsetY = paddingY + leftoverY * scale;
+
+                // Set canvas size
+                canvas.width = boxW + padding.left + padding.right;
+                canvas.height = boxH + padding.top + padding.bottom;
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = colors.background;
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
 
                 // LED box
                 ctx.fillStyle = colors.box;
@@ -295,11 +352,7 @@
                 ctx.setLineDash([]);
 
                 // Center label
-                const textLines = [
-                    "16:9 Content",
-                    `${contentWidth.toFixed(2).replace(/[.,]00$/, "")} cm x ${contentHeight.toFixed(2).replace(/[.,]00$/, "")} cm`,
-                    `${contentPixelWidth} px x ${contentPixelHeight} px`,
-                ];
+                const textLines = ["16:9 Content", `${formatNumber(contentWidth)} cm x ${formatNumber(contentHeight)} cm`, `${contentPixelWidth} px x ${contentPixelHeight} px`];
                 ctx.font = "12px sans-serif";
                 ctx.textAlign = "center";
                 const textHeight = 14;
@@ -341,7 +394,7 @@
                     ctx.lineTo(arrowEndX, arrowY + 3);
                     ctx.stroke();
 
-                    ctx.fillText(`Leftover ${leftoverX.toFixed(2).replace(/[.,]00$/, "")} cm`, (arrowStartX + arrowEndX) / 2, arrowY - 5);
+                    ctx.fillText(`Leftover ${formatNumber(leftoverX)} cm`, (arrowStartX + arrowEndX) / 2, arrowY - 5);
                 }
 
                 if (leftoverY > 0) {
@@ -366,11 +419,9 @@
                     ctx.save();
                     ctx.translate(paddingX - 15, (arrowStartY + arrowEndY) / 2);
                     ctx.rotate(-Math.PI / 2);
-                    ctx.fillText(`Leftover ${leftoverY.toFixed(2).replace(/[.,]00$/, "")} cm`, 0, 0);
+                    ctx.fillText(`Leftover ${formatNumber(leftoverY)} cm`, 0, 0);
                     ctx.restore();
                 }
-
-                const leftover = leftoverX > 0 ? leftoverX : leftoverY;
 
                 ctx.font = "16px sans-serif";
                 ctx.fillText(`W: ${ledWidth} cm / ${pixelWidth} px`, paddingX + boxW / 2, paddingY + boxH + 25);
@@ -379,18 +430,47 @@
                 ctx.rotate(-Math.PI / 2);
                 ctx.fillText(`H: ${ledHeight} cm / ${pixelHeight} px`, 0, 0);
                 ctx.restore();
+            }
+
+            function renderInfo({ ledWidth, ledHeight, pixelWidth, pixelHeight, pitch, pitchPixel, contentWidth, contentHeight, contentPixelWidth, contentPixelHeight, leftover }) {
+                const ledSizeHtml = `
+                    <div class="result led-size-result">
+                        <strong>LED Size:</strong><br/>
+                        ${ledWidth} cm x ${ledHeight} cm <br/>
+                        (${pixelWidth} px x ${pixelHeight} px)
+                    </div>
+                `;
+
+                const pitchHtml = `
+                    <div class="result">
+                        <strong>Pitch Resolution:</strong><br/>
+                        ${pitch} mm <br/>
+                        ${pitchPixel} px/m
+                    </div>
+                `;
+
+                const contentHtml = `
+                    <div class="result">
+                        <strong>16:9 Content Size:</strong><br/>
+                        ${formatNumber(contentWidth)} cm x ${formatNumber(contentHeight)} cm <br/>
+                        <small class="text-muted">(${contentPixelWidth} px x ${contentPixelHeight} px)</small>
+                    </div>
+                `;
+
+                const leftoverHtml = `
+                    <div class="result">
+                        <strong>Leftover:</strong><br/>
+                        ${formatNumber(leftover)} cm
+                    </div>
+                `;
 
                 document.getElementById("info").innerHTML = `
                     <div class="download-info">Double Click/Tap Image to Download</div>
                     <div class='grid'>
-                        <div class="result led-size-result"><strong>LED Size:</strong><br/>
-                            ${ledWidth} cm x ${ledHeight} cm <br/>(${pixelWidth} px x ${pixelHeight} px)
-                        </div>
-                        <div class="result"><strong>Pitch Resolution:</strong><br/>${pitch} mm <br/>${pitchPixel} px/m</div>
-                        <div class="result"><strong>16:9 Content Size:</strong><br/>${contentWidth.toFixed(2).replace(/[.,]00$/, "")} cm x ${contentHeight
-                    .toFixed(2)
-                    .replace(/[.,]00$/, "")} cm <br/> <small class="text-muted">(${contentPixelWidth} px x ${contentPixelHeight} px)</small></div>
-                        <div class="result"><strong>Leftover:</strong><br/>${leftover.toFixed(2).replace(/[.,]00$/, "")} cm</div>
+                        ${ledSizeHtml}
+                        ${pitchHtml}
+                        ${contentHtml}
+                        ${leftoverHtml}
                     </div>
                 `;
             }

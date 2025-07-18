@@ -215,14 +215,14 @@
                 const canvasHeight = 600;
                 const padding = 60;
 
-                // 1. Hitung skala LED agar muat di canvas (dengan padding)
+                // 1. Calculate LED scale to fit canvas (with padding)
                 const ledScale = Math.min((canvasWidth - 2 * padding) / ledWidth, (canvasHeight - 2 * padding) / ledHeight);
                 const ledDrawWidth = ledWidth * ledScale;
                 const ledDrawHeight = ledHeight * ledScale;
                 const ledOffsetX = (canvasWidth - ledDrawWidth) / 2;
                 const ledOffsetY = (canvasHeight - ledDrawHeight) / 2;
 
-                // 2. Hitung skala content agar fit/cover area LED
+                // 2. Calculate content scale to fit/cover LED area
                 let contentAspect = 16 / 9;
                 if (previewOrientation === "portrait") contentAspect = 9 / 16;
                 const ledAspect = ledWidth / ledHeight;
@@ -249,14 +249,14 @@
                 const contentOffsetX = ledOffsetX + (ledDrawWidth - contentDrawWidth) / 2;
                 const contentOffsetY = ledOffsetY + (ledDrawHeight - contentDrawHeight) / 2;
 
-                // 3. Hitung pixel
+                // 3. Calculate pixels
                 const pitchPixel = Math.round(1000 / pitch);
                 const pixelWidth = Math.round((ledWidth / 100) * pitchPixel);
                 const pixelHeight = Math.round((ledHeight / 100) * pitchPixel);
                 const contentPixelWidth = Math.round((contentDrawWidth / ledScale / 100) * pitchPixel);
                 const contentPixelHeight = Math.round((contentDrawHeight / ledScale / 100) * pitchPixel);
 
-                // 4. Hitung leftover/overflow (dalam cm)
+                // 4. Calculate leftover/overflow (in cm)
                 let leftover = 0,
                     overflow = 0;
                 if (fitMode === "contain") {
@@ -359,11 +359,9 @@
                 const canvas = document.getElementById("ledCanvas");
                 const ctx = canvas.getContext("2d");
 
-                // Set canvas size
+                // Set canvas size and clear
                 canvas.width = canvasWidth;
                 canvas.height = canvasHeight;
-
-                // Clear and fill background
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 ctx.fillStyle = colors.background;
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -375,9 +373,9 @@
                 ctx.lineWidth = 4;
                 ctx.strokeRect(ledOffsetX - 2, ledOffsetY - 2, ledDrawWidth + 4, ledDrawHeight + 4);
 
-                // Draw content area (16:9 or 9:16) - warna biru hanya untuk bagian yang di dalam LED box
+                // Draw content area (blue for inside, red for overflow)
                 if (fitMode === "cover") {
-                    // Bagian dalam LED box (biru)
+                    // Content inside LED box (blue)
                     const intersectX = Math.max(contentOffsetX, ledOffsetX);
                     const intersectY = Math.max(contentOffsetY, ledOffsetY);
                     const intersectW = Math.max(0, Math.min(contentOffsetX + contentDrawWidth, ledOffsetX + ledDrawWidth) - intersectX);
@@ -387,69 +385,31 @@
                         ctx.fillRect(intersectX, intersectY, intersectW, intersectH);
                     }
 
-                    // Bagian luar LED box (overflow, merah transparan)
+                    // Content outside LED box (overflow, semi-transparent red)
                     ctx.save();
-                    ctx.globalAlpha = 0.5; // <-- tambahkan ini
+                    ctx.globalAlpha = 0.5;
                     ctx.fillStyle = "#870000";
-
-                    // Kiri
                     if (contentOffsetX < ledOffsetX) {
                         ctx.fillRect(contentOffsetX, contentOffsetY, ledOffsetX - contentOffsetX, contentDrawHeight);
                     }
-                    // Kanan
                     if (contentOffsetX + contentDrawWidth > ledOffsetX + ledDrawWidth) {
                         ctx.fillRect(ledOffsetX + ledDrawWidth, contentOffsetY, contentOffsetX + contentDrawWidth - (ledOffsetX + ledDrawWidth), contentDrawHeight);
                     }
-                    // Atas
                     if (contentOffsetY < ledOffsetY) {
                         const left = Math.max(contentOffsetX, ledOffsetX);
                         const right = Math.min(contentOffsetX + contentDrawWidth, ledOffsetX + ledDrawWidth);
                         ctx.fillRect(left, contentOffsetY, right - left, ledOffsetY - contentOffsetY);
                     }
-                    // Bawah
                     if (contentOffsetY + contentDrawHeight > ledOffsetY + ledDrawHeight) {
                         const left = Math.max(contentOffsetX, ledOffsetX);
                         const right = Math.min(contentOffsetX + contentDrawWidth, ledOffsetX + ledDrawWidth);
                         ctx.fillRect(left, ledOffsetY + ledDrawHeight, right - left, contentOffsetY + contentDrawHeight - (ledOffsetY + ledDrawHeight));
                     }
-                    ctx.restore(); // <-- kembalikan alpha ke normal
+                    ctx.restore();
                 } else {
-                    // Mode contain: seluruh content pasti di dalam LED box, cukup biru saja
+                    // Contain mode: all content is inside LED box, just draw blue
                     ctx.fillStyle = colors.content;
                     ctx.fillRect(contentOffsetX, contentOffsetY, contentDrawWidth, contentDrawHeight);
-                }
-
-                // Highlight ONLY the part of content that is outside LED box (cover mode)
-                if (fitMode === "cover") {
-                    ctx.save();
-                    ctx.globalAlpha = 0.5;
-                    ctx.beginPath();
-                    // Bagian kiri (hanya area biru di luar LED box)
-                    if (contentOffsetX < ledOffsetX) {
-                        ctx.rect(contentOffsetX, contentOffsetY, Math.min(ledOffsetX, contentOffsetX + contentDrawWidth) - contentOffsetX, contentDrawHeight);
-                    }
-                    // Bagian kanan
-                    if (contentOffsetX + contentDrawWidth > ledOffsetX + ledDrawWidth) {
-                        ctx.rect(
-                            Math.max(ledOffsetX + ledDrawWidth, contentOffsetX),
-                            contentOffsetY,
-                            contentOffsetX + contentDrawWidth - Math.max(ledOffsetX + ledDrawWidth, contentOffsetX),
-                            contentDrawHeight
-                        );
-                    }
-                    // Bagian atas
-                    if (contentOffsetY < ledOffsetY) {
-                        const left = Math.max(contentOffsetX, ledOffsetX);
-                        const right = Math.min(contentOffsetX + contentDrawWidth, ledOffsetX + ledDrawWidth);
-                        ctx.rect(left, contentOffsetY, right - left, ledOffsetY - contentOffsetY);
-                    }
-                    // Bagian bawah
-                    if (contentOffsetY + contentDrawHeight > ledOffsetY + ledDrawHeight) {
-                        const left = Math.max(contentOffsetX, ledOffsetX);
-                        const right = Math.min(contentOffsetX + contentDrawWidth, ledOffsetX + ledDrawWidth);
-                        ctx.rect(left, ledOffsetY + ledDrawHeight, right - left, contentOffsetY + contentDrawHeight - (ledOffsetY + ledDrawHeight));
-                    }
-                    ctx.restore();
                 }
 
                 // Diagonal lines in content
@@ -507,11 +467,11 @@
                 ctx.font = "12px sans-serif";
 
                 if (fitMode === "contain" && leftover > 0) {
-                    // Horizontal leftover (panah di atas LED box)
+                    // Horizontal leftover (arrow above LED box)
                     if (ledDrawWidth - contentDrawWidth > 0) {
                         const y = ledOffsetY - 20;
                         const x1 = ledOffsetX;
-                        const x2 = ledOffsetX + leftover * scale; // <-- perbaiki di sini
+                        const x2 = ledOffsetX + leftover * scale;
                         ctx.beginPath();
                         ctx.moveTo(x1, y);
                         ctx.lineTo(x2, y);
@@ -526,11 +486,11 @@
 
                         ctx.fillText(`Leftover: ${formatNumber(leftover)} cm`, (x1 + x2) / 2, y - 8);
                     }
-                    // Vertical leftover (panah di kiri LED box)
+                    // Vertical leftover (arrow on the left of LED box)
                     if (ledDrawHeight - contentDrawHeight > 0) {
                         const x = ledOffsetX - 20;
                         const y1 = ledOffsetY;
-                        const y2 = ledOffsetY + leftover * scale; // <-- perbaiki di sini
+                        const y2 = ledOffsetY + leftover * scale;
                         ctx.beginPath();
                         ctx.moveTo(x, y1);
                         ctx.lineTo(x, y2);
@@ -552,7 +512,7 @@
                 }
 
                 if (fitMode === "cover" && overflow > 0) {
-                    // Horizontal overflow (panah di atas LED box)
+                    // Horizontal overflow (arrow above LED box)
                     if (contentDrawWidth - ledDrawWidth > 0) {
                         const y = ledOffsetY - 20;
                         const x1 = contentOffsetX;
@@ -571,11 +531,11 @@
 
                         ctx.fillText(`Overflow: ${formatNumber(overflow)} cm`, (x1 + x2) / 2, y - 8);
                     }
-                    // Vertical overflow (panah di kiri LED box)
+                    // Vertical overflow (arrow on the left of LED box)
                     if (contentDrawHeight - ledDrawHeight > 0) {
                         const x = contentOffsetX - 20;
                         const y1 = contentOffsetY;
-                        const y2 = contentOffsetY + overflow * scale; // <-- perbaiki di sini
+                        const y2 = contentOffsetY + overflow * scale;
                         ctx.beginPath();
                         ctx.moveTo(x, y1);
                         ctx.lineTo(x, y2);
@@ -681,12 +641,11 @@
 
             document.querySelector(".theme-toggle").addEventListener("click", toggleTheme);
 
-            // Load theme from localStorage
+            // Load theme from localStorage or system preference
             const savedTheme = localStorage.getItem("theme");
             if (savedTheme) {
                 setTheme(savedTheme);
             } else {
-                // Optionally detect system preference
                 const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
                 setTheme(prefersDark ? "dark" : "light");
             }

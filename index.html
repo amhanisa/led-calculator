@@ -237,19 +237,27 @@
                 if (previewOrientation === "landscape") {
                     contentWidth = (16 / 9) * ledHeight;
                     contentHeight = ledHeight;
+                    if (contentWidth > ledWidth) {
+                        contentWidth = ledWidth;
+                        contentHeight = (9 / 16) * ledWidth;
+                        leftoverX = 0;
+                        leftoverY = (ledHeight - contentHeight) / 2;
+                    } else {
+                        leftoverX = (ledWidth - contentWidth) / 2;
+                        leftoverY = 0;
+                    }
                 } else {
-                    contentWidth = (9 / 16) * ledHeight;
                     contentHeight = ledHeight;
-                }
-
-                let leftoverX = (ledWidth - contentWidth) / 2;
-                let leftoverY = 0;
-
-                if (contentWidth > ledWidth) {
-                    contentWidth = ledWidth;
-                    contentHeight = (9 / 16) * ledWidth;
-                    leftoverX = 0;
-                    leftoverY = (ledHeight - contentHeight) / 2;
+                    contentWidth = (9 / 16) * ledHeight;
+                    if (contentWidth > ledWidth) {
+                        contentWidth = ledWidth;
+                        contentHeight = (16 / 9) * ledWidth;
+                        leftoverX = 0;
+                        leftoverY = (ledHeight - contentHeight) / 2;
+                    } else {
+                        leftoverX = (ledWidth - contentWidth) / 2;
+                        leftoverY = 0;
+                    }
                 }
 
                 const pitchPixel = Math.round(1000 / pitch);

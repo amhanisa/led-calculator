@@ -305,11 +305,12 @@
                     pixelHeight,
                     pitch,
                     pitchPixel,
-                    contentWidth: (contentDrawWidth / ledScale).toFixed(2),
-                    contentHeight: (contentDrawHeight / ledScale).toFixed(2),
+                    contentWidth: contentDrawWidth / ledScale,
+                    contentHeight: contentDrawHeight / ledScale,
                     contentPixelWidth,
                     contentPixelHeight,
-                    leftover: fitMode === "contain" ? Math.max(leftoverX, leftoverY).toFixed(2) : Math.max(overflowX, overflowY).toFixed(2),
+                    leftover: fitMode === "contain" ? Math.max(leftoverX, leftoverY) : Math.max(overflowX, overflowY),
+                    fitMode,
                 });
             }
 
@@ -610,7 +611,7 @@
             }
 
             // Render the info panel below the canvas
-            function renderInfo({ ledWidth, ledHeight, pixelWidth, pixelHeight, pitch, pitchPixel, contentWidth, contentHeight, contentPixelWidth, contentPixelHeight, leftover }) {
+            function renderInfo({ ledWidth, ledHeight, pixelWidth, pixelHeight, pitch, pitchPixel, contentWidth, contentHeight, contentPixelWidth, contentPixelHeight, leftover, fitMode }) {
                 const ledSizeHtml = `
                     <div class="result led-size-result">
                         <strong>LED Size:</strong><br/>
@@ -637,11 +638,10 @@
 
                 const leftoverHtml = `
                     <div class="result">
-                        <strong>Leftover:</strong><br/>
+                        <strong>${fitMode === "contain" ? "Leftover" : "Overflow"}:</strong><br/>
                         ${formatNumber(leftover)} cm
                     </div>
                 `;
-
                 document.getElementById("info").innerHTML = `
                     <div class="download-info">Double Click/Tap Image to Download</div>
                     <div class='grid'>

@@ -524,24 +524,6 @@
 
                             ctx.fillText(`Leftover: ${formatNumber(leftoverX)} cm`, (x1 + x2) / 2, y - 8);
                         }
-                        // Panah dari sisi kanan content ke sisi kanan LED (jika ada sisa di kanan)
-                        else if (contentOffsetX < ledOffsetX) {
-                            const x1 = contentOffsetX + contentDrawWidth;
-                            const x2 = ledOffsetX + ledDrawWidth;
-                            ctx.beginPath();
-                            ctx.moveTo(x1, y);
-                            ctx.lineTo(x2, y);
-                            ctx.stroke();
-
-                            ctx.beginPath();
-                            ctx.moveTo(x1, y - 5);
-                            ctx.lineTo(x1, y + 5);
-                            ctx.moveTo(x2, y - 5);
-                            ctx.lineTo(x2, y + 5);
-                            ctx.stroke();
-
-                            ctx.fillText(`Leftover: ${formatNumber(leftoverX)} cm`, (x1 + x2) / 2, y - 8);
-                        }
                     }
                     // Vertical leftover (panah di kiri LED box)
                     if (leftoverY > 0) {
@@ -550,28 +532,6 @@
                         if (contentOffsetY > ledOffsetY) {
                             const y1 = ledOffsetY;
                             const y2 = contentOffsetY;
-                            ctx.beginPath();
-                            ctx.moveTo(x, y1);
-                            ctx.lineTo(x, y2);
-                            ctx.stroke();
-
-                            ctx.beginPath();
-                            ctx.moveTo(x - 5, y1);
-                            ctx.lineTo(x + 5, y1);
-                            ctx.moveTo(x - 5, y2);
-                            ctx.lineTo(x + 5, y2);
-                            ctx.stroke();
-
-                            ctx.save();
-                            ctx.translate(x - 10, (y1 + y2) / 2);
-                            ctx.rotate(-Math.PI / 2);
-                            ctx.fillText(`Leftover: ${formatNumber(leftoverY)} cm`, 0, 0);
-                            ctx.restore();
-                        }
-                        // Panah dari sisi bawah content ke sisi bawah LED
-                        else if (contentOffsetY < ledOffsetY) {
-                            const y1 = contentOffsetY + contentDrawHeight;
-                            const y2 = ledOffsetY + ledDrawHeight;
                             ctx.beginPath();
                             ctx.moveTo(x, y1);
                             ctx.lineTo(x, y2);
@@ -614,25 +574,8 @@
                             ctx.lineTo(x2, y + 5);
                             ctx.stroke();
 
-                            ctx.fillText(`Overflow: ${formatNumber(overflowX)} cm`, (x1 + x2) / 2, y - 8);
-                        }
-                        // Overflow kanan
-                        else if (contentOffsetX + contentDrawWidth > ledOffsetX + ledDrawWidth) {
-                            const x1 = ledOffsetX + ledDrawWidth;
-                            const x2 = contentOffsetX + contentDrawWidth;
-                            ctx.beginPath();
-                            ctx.moveTo(x1, y);
-                            ctx.lineTo(x2, y);
-                            ctx.stroke();
-
-                            ctx.beginPath();
-                            ctx.moveTo(x1, y - 5);
-                            ctx.lineTo(x1, y + 5);
-                            ctx.moveTo(x2, y - 5);
-                            ctx.lineTo(x2, y + 5);
-                            ctx.stroke();
-
-                            ctx.fillText(`Overflow: ${formatNumber(overflowX)} cm`, (x1 + x2) / 2, y - 8);
+                            ctx.textAlign = "right";
+                            ctx.fillText(`Overflow: ${formatNumber(overflowX)} cm`, x2, y - 8); // rata kanan, nempel LED box
                         }
                     }
                     // Vertical overflow (panah di kiri LED box)
@@ -655,31 +598,10 @@
                             ctx.stroke();
 
                             ctx.save();
-                            ctx.translate(x - 10, (y1 + y2) / 2);
+                            ctx.textAlign = "left";
+                            ctx.translate(x, y2);
                             ctx.rotate(-Math.PI / 2);
-                            ctx.fillText(`Overflow: ${formatNumber(overflowY)} cm`, 0, 0);
-                            ctx.restore();
-                        }
-                        // Overflow bawah
-                        else if (contentOffsetY + contentDrawHeight > ledOffsetY + ledDrawHeight) {
-                            const y1 = ledOffsetY + ledDrawHeight;
-                            const y2 = contentOffsetY + contentDrawHeight;
-                            ctx.beginPath();
-                            ctx.moveTo(x, y1);
-                            ctx.lineTo(x, y2);
-                            ctx.stroke();
-
-                            ctx.beginPath();
-                            ctx.moveTo(x - 5, y1);
-                            ctx.lineTo(x + 5, y1);
-                            ctx.moveTo(x - 5, y2);
-                            ctx.lineTo(x + 5, y2);
-                            ctx.stroke();
-
-                            ctx.save();
-                            ctx.translate(x - 10, (y1 + y2) / 2);
-                            ctx.rotate(-Math.PI / 2);
-                            ctx.fillText(`Overflow: ${formatNumber(overflowY)} cm`, 0, 0);
+                            ctx.fillText(`Overflow: ${formatNumber(overflowY)} cm`, 0, -8); // rata kiri, nempel LED box
                             ctx.restore();
                         }
                     }

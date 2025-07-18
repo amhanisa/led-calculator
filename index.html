@@ -254,7 +254,7 @@
             }
 
             // Validate user input for width and height
-            function validateInput(w, h) {
+            function validateInput(width, height) {
                 if (!w || !h || w <= 0 || h <= 0) {
                     alert("Please enter valid values for Width and Height.");
                     return false;
@@ -509,7 +509,6 @@
 
             document.getElementById("ledCanvas").addEventListener("dblclick", function () {
                 const link = document.createElement("a");
-                console.log(this);
                 link.download = "led-calculation.png";
                 link.href = this.toDataURL("image/png");
                 link.click();

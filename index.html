@@ -482,17 +482,6 @@
                     ctx.fillText(textLines[i], textX, textY + i * textHeight + 3);
                 }
 
-                // Draw leftover/overflow label
-                ctx.font = "14px sans-serif";
-                ctx.fillStyle = colors.leftover;
-                ctx.textAlign = "left";
-                if (fitMode === "contain" && (leftoverX > 0 || leftoverY > 0)) {
-                    ctx.fillText(`Leftover: ${formatNumber(Math.max(leftoverX, leftoverY))} cm`, ledOffsetX + 10, ledOffsetY + 20);
-                }
-                if (fitMode === "cover" && (overflowX > 0 || overflowY > 0)) {
-                    ctx.fillText(`Overflow: ${formatNumber(Math.max(overflowX, overflowY))} cm`, ledOffsetX + 10, ledOffsetY + 20);
-                }
-
                 // Draw width and height labels
                 ctx.font = "16px sans-serif";
                 ctx.fillStyle = colors.stroke;
@@ -507,13 +496,13 @@
                 // Draw leftover/overflow arrows and labels
                 ctx.save();
                 ctx.strokeStyle = "red";
-                ctx.fillStyle = "red";
+                ctx.fillStyle = "white";
                 ctx.lineWidth = 2;
-                ctx.font = "14px sans-serif";
-                ctx.textAlign = "center";
+                ctx.font = "12px sans-serif";
 
                 // LEFTOVER (contain)
                 if (fitMode === "contain") {
+                    ctx.textAlign = "center";
                     // Horizontal leftover (panah di atas LED box)
                     if (leftoverX > 0) {
                         const y = ledOffsetY - 20;

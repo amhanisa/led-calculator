@@ -9,7 +9,37 @@
         <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚀</text></svg>" />
         <style>
             body {
-                padding: 20px;
+                padding: 0 20px 20px;
+            }
+
+            a.pixelplan-bar {
+                display: block;
+                box-sizing: border-box;
+                margin: 0 -20px 1.25rem;
+                padding: 0.7rem 1.25rem;
+                min-height: 44px;
+                background: #99c801;
+                color: #142000;
+                font-size: 1rem;
+                font-weight: 600;
+                line-height: 1.4;
+                text-align: center;
+                text-decoration: none;
+            }
+
+            a.pixelplan-bar:hover,
+            a.pixelplan-bar:focus,
+            a.pixelplan-bar:active {
+                background: #88b001;
+                color: #142000;
+                text-decoration: none;
+            }
+
+            @media screen and (max-width: 768px) {
+                a.pixelplan-bar {
+                    padding: 0.6rem 0.85rem;
+                    font-size: 0.9rem;
+                }
             }
 
             .container {
@@ -94,6 +124,9 @@
         </script>
     </head>
     <body>
+        <a class="pixelplan-bar" href="https://pixelplan.amhanisa.com" target="_blank" rel="noopener noreferrer">
+            Cek PixelPlan, web kalkulator LED yang lebih banyak fitur <span aria-hidden="true">→</span>
+        </a>
         <main class="container">
             <nav style="align-items: center; margin-bottom: 1em">
                 <h2 style="margin: 0">LED Resolution Calculator</h2>
